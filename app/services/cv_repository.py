@@ -18,3 +18,17 @@ async def insert_cv(cv_data: Dict[str, Any]) -> str:
 
     result = await db["cvs"].insert_one(doc)
     return str(result.inserted_id)
+
+async def get_cv_by_id(cv_id: str) -> Dict[str, Any] | None:
+    """
+    Fetch a CV document from the 'cvs' collection by its MongoDB ObjectId.
+    Returns the document as a dict or None if not found.
+    """
+    try:
+        obj_id = ObjectId(cv_id)
+    except Exception:
+        return None
+
+    db = get_database()
+    doc = await db["cvs"].find_one({"_id": obj_id})
+    return doc

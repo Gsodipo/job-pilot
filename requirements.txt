@@ -6,3 +6,5 @@ motor
 PyMuPDF
 pydantic
 python-multipart  
+scikit-learn
+numpy
