@@ -1,7 +1,4 @@
 1️⃣ README.md (project overview)
-
-In your repo root (job-pilot), open or create README.md and replace its contents with this:
-
 # JobPilot
 
 JobPilot is an AI-assisted job application tool that helps you:
