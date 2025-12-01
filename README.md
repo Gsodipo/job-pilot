@@ -1,155 +1,219 @@
-🚀 JobPilot – AI-Powered Job Application Automation (Backend)
+✅ UPDATED README.md (copy/paste into your repo)
+# 🚀 JobPilot – AI Job Application Assistant (Backend)
 
-JobPilot is an AI-driven automation tool designed to analyze CVs, score job matches, and help users apply to jobs faster and smarter.
-This repository contains the full backend built with FastAPI + MongoDB, including CV upload, parsing, job matching, and scoring logic.
+JobPilot is an AI-assisted job application tool designed to make job searching faster, smarter, and less stressful.  
+This backend MVP currently supports automated CV parsing, job-to-CV matching, and AI-powered cover letter generation.
 
-🔥 Features
-✅ 1. CV Upload & Parsing
+The project is being built publicly to sharpen backend development skills (FastAPI, MongoDB, vector matching) while creating a genuinely useful tool for job seekers.
 
-Upload PDF CVs via /upload_cv
+---
 
-Extract:
+# 📌 Features (Current – Phase 3 Complete)
 
-Parsed text
+### ✅ **1. CV Upload & Parsing**
+Upload a PDF CV and automatically extract:
+- Full text
+- Skills (keyword-based extraction)
+- Experience lines
+- File metadata  
+Stored in MongoDB for reuse.
 
-Technical skills
+### ✅ **2. Job Matching Engine**
+Given a CV ID and job description, JobPilot:
+- Extracts job skills  
+- Computes semantic similarity using **TF-IDF + cosine similarity**
+- Measures skill overlap  
+- Produces a **match score (0–100)**  
+- Returns:
+  - `semantic_score`
+  - `skill_score`
+  - `job_skills`
+  - `overlapping_skills`
+  - `missing_skills`
 
-Work experience
+### ✅ **3. AI Cover Letter Generation**
+Uses extracted CV data + job description to generate:
+- A full tailored cover letter  
+- Optional tone (e.g. *professional, enthusiastic*)  
+- Fully structured paragraphs  
+- Ready to copy/paste  
 
-Store CVs in MongoDB for later matching
+### 🔒 Fully structured JSON API responses for front-end or extension integration.
 
-✅ 2. Job Matching API
+---
 
-Analyse a job description + stored CV
+# 🛠️ Tech Stack
 
-Extract skills from job description
+**Backend**
+- FastAPI
+- Python 3.12
+- PyMuPDF (PDF parsing)
+- scikit-learn (TF-IDF job matching)
+- Motor (async MongoDB driver)
+- MongoDB Community Server
+- Pydantic
 
-Compute:
+**AI Layer**
+- OpenAI API (for cover letter generation)
 
-Semantic score (TF-IDF cosine similarity)
+**Frontend (Planned)**
+- React + TypeScript
+- TailwindCSS
+- Job dashboard UI
 
-Skill score (overlap vs missing skills)
+**Browser Extension (Planned)**
+- JavaScript (Manifest V3)
+- Auto-scrape job descriptions → send to JobPilot API
 
-Final match score (weighted)
+---
 
-Identify:
+# 📂 Project Structure
 
-overlapping_skills
 
-missing_skills
 
-✅ 3. MongoDB Integration
+jobpilot-backend/
+├── main.py
+├── requirements.txt
+├── .env # Local use only
+└── app/
+├── api/
+│ ├── cv_routes.py
+│ └── job_routes.py
+├── core/
+│ └── database.py
+├── schemas/
+│ ├── cv_schema.py
+│ └── job_schema.py
+└── services/
+├── cv_parser.py
+├── cv_repository.py
+└── job_matcher.py
 
-Stores CVs with metadata
 
-Fast lookup for job matching
+---
 
-Clean, modular repository structure
+# 🔌 API Endpoints
 
-✅ 4. Fully Documented Swagger API
+## 🟢 Health Check
 
-Access at:
 
-http://127.0.0.1:8000/docs
+GET /health
 
-🛠️ Tech Stack
-Component	Technology
-Backend Framework	FastAPI
-Language	Python
-Database	MongoDB (Motor async driver)
-Parsing Engine	PyPDF / custom text extractor
-Matching Logic	TF-IDF + cosine similarity
-Architecture	Modular service/repository layout
-📡 API Endpoints
-📄 1. Upload CV
+**Response**
+```json
+{ "status": "ok", "app": "JobPilot backend is running 🎯" }
 
+📄 Upload CV
 POST /upload_cv
-Upload a PDF and store parsed CV in MongoDB.
 
-Response example:
+
+Response
 
 {
-  "cv_id": "692c634eb6a0e2ce9b65b0ec",
-  "file_name": "Grant_CV.pdf",
-  "skills": ["python", "sql", "linux"],
-  "experience": ["Software Engineer Intern", "IT Support Technician"]
+  "cv_id": "<id>",
+  "file_name": "CV.pdf",
+  "skills": [...],
+  "experience": [...]
 }
 
-🔍 2. Match Job to CV
-
+🎯 Match Job to CV
 POST /jobs/match
 
-Request example:
+
+Request
 
 {
-  "cv_id": "692c634eb6a0e2ce9b65b0ec",
-  "job_title": "Application Support Engineer",
+  "cv_id": "<id>",
+  "job_title": "Business Data Analyst",
   "company": "ExampleCorp",
-  "job_description": "Looking for someone with Python, SQL, REST APIs, troubleshooting..."
+  "job_description": "We are looking for..."
 }
 
 
-Response example:
+Response
 
 {
-  "cv_id": "692c634eb6a0e2ce9b65b0ec",
-  "job_title": "Application Support Engineer",
-  "company": "ExampleCorp",
-  "match_score": 22.5,
-  "semantic_score": 0.18,
-  "skill_score": 0.5,
-  "job_skills": ["python", "sql", "rest apis", "troubleshooting"],
-  "overlapping_skills": ["python", "sql"],
-  "missing_skills": ["rest apis", "troubleshooting"]
+  "match_score": 85.3,
+  "semantic_score": 0.76,
+  "skill_score": 0.90,
+  "job_skills": [...],
+  "overlapping_skills": [...],
+  "missing_skills": [...]
 }
 
-📁 Project Structure
-jobpilot-backend/
-│── app/
-│   ├── api/
-│   │   ├── cv_routes.py
-│   │   └── job_routes.py
-│   ├── services/
-│   │   ├── cv_parser.py
-│   │   └── cv_repository.py
-│   ├── core/
-│   │   └── database.py
-│   └── models/
-│
-│── main.py
-│── requirements.txt
-│── README.md
+📝 Generate Cover Letter
+POST /jobs/generate_cover_letter
 
-🚀 How to Run Locally
+
+Response
+
+{
+  "cover_letter": "Dear Hiring Manager..."
+}
+
+🧪 Running Locally
 1. Clone the repo
 git clone https://github.com/Gsodipo/job-pilot.git
-cd job-pilot
+cd job-pilot/jobpilot-backend
 
-2. Create virtual environment
+2. Create & activate virtual environment
+
+Windows:
+
 python -m venv venv
-source venv/bin/activate   # (Mac/Linux)
-venv\Scripts\activate      # (Windows)
+venv\Scripts\activate
+
+
+Linux/macOS:
+
+source venv/bin/activate
 
 3. Install dependencies
 pip install -r requirements.txt
 
-4. Start the server
+4. Create .env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=jobpilot
+OPENAI_API_KEY=yourkey
+
+5. Start server
 uvicorn main:app --reload
 
-5. Open API documentation
-http://127.0.0.1:8000/docs
+🗺️ Roadmap
+Phase 4 — Job Tracker
 
-🧭 Next Steps (Roadmap)
+Save jobs
 
-Phase 3 → AI Cover Letter Generator
+Update statuses (Saved, Applied, Interview, Offer, Rejected)
 
-Phase 4 → Improved semantic embeddings (OpenAI)
+Notes per application
 
-Phase 5 → Frontend dashboard integration
+Dashboard API
 
-Phase 6 → Browser extension for auto-applying
+Phase 5 — Frontend
 
-🏆 Author
+React CV upload page
 
-Grant Sodipo — Building AI-powered tools that automate job applications.
-GitHub: https://github.com/Gsodipo
+Job matching UI
+
+Cover letter editor
+
+Application tracker dashboard
+
+Phase 6 — Browser Extension
+
+Auto-detect job postings (LinkedIn, Indeed, Glassdoor)
+
+Extract job descriptions
+
+Send to JobPilot API
+
+Autofill job applications (stretch goal)
+
+Phase 7 — Cloud Deployment
+
+Deploy backend to AWS / Render / Railway
+
+Use MongoDB Atlas
+
+API authentication + rate limiting
