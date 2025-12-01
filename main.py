@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.cv_routes import router as cv_router  # 👈 NEW
 from app.api.job_routes import router as job_router 
+from app.api.cover_letter_routes import router as cover_letter_router
 
 
 app = FastAPI()
@@ -30,3 +31,4 @@ def health_check():
 # 👇 NEW: include CV routes
 app.include_router(cv_router, tags=["CV"])
 app.include_router(job_router)
+app.include_router(cover_letter_router) 
