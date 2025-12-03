@@ -1,0 +1,398 @@
+/* === JobPilot Design Tokens === */
+:root {
+  --jp-primary: #1fa6b2;
+  --jp-primary-dark: #0f8a95;
+  --jp-primary-light: #e6f7f8;
+
+  --jp-navy: #0f2b3a;
+  --jp-text: #1e2a35;
+  --jp-text-muted: #6b7a88;
+
+  --jp-border: #d5e0ea;
+  --jp-bg: #f5f7fa;
+  --jp-card-bg: #ffffff;
+
+  --jp-radius-lg: 14px;
+  --jp-radius-md: 10px;
+
+  --jp-shadow-soft: 0 10px 30px rgba(15, 43, 58, 0.08);
+}
+
+/* === Base === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  background: radial-gradient(
+    circle at top left,
+    #ffffff 0,
+    #f5f7fa 45%,
+    #e9f3f6 100%
+  );
+  color: var(--jp-text);
+}
+
+/* === App shell === */
+.jp-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.jp-header {
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid rgba(213, 224, 234, 0.7);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.jp-header-logo {
+  height: 36px;
+  width: auto;
+}
+
+.jp-header-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--jp-navy);
+}
+
+.jp-header-tagline {
+  font-size: 14px;
+  color: var(--jp-text-muted);
+}
+
+/* MAIN LAYOUT */
+.jp-main {
+  max-width: 1120px;
+  margin: 26px auto 40px;
+  padding: 0 20px 40px;
+}
+
+/* Sections */
+.jp-section {
+  margin-bottom: 30px;
+}
+
+.jp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.jp-section-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--jp-primary-light);
+  color: var(--jp-primary-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.jp-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--jp-navy);
+}
+
+.jp-section-subtitle {
+  font-size: 14px;
+  color: var(--jp-text-muted);
+}
+
+/* Cards */
+.jp-card {
+  background: var(--jp-card-bg);
+  border-radius: var(--jp-radius-lg);
+  padding: 18px 20px 20px;
+  box-shadow: var(--jp-shadow-soft);
+  border: 1px solid rgba(213, 224, 234, 0.8);
+}
+
+/* Forms */
+.jp-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.jp-form-grid--two-col {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.jp-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jp-label {
+  font-size: 14px;
+  color: var(--jp-text);
+  font-weight: 500;
+}
+
+.jp-hint {
+  font-size: 12px;
+  color: var(--jp-text-muted);
+}
+
+/* Inputs */
+.jp-input,
+.jp-textarea {
+  border-radius: var(--jp-radius-md);
+  border: 1px solid var(--jp-border);
+  padding: 9px 11px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  background: #fbfdff;
+}
+
+.jp-input:focus,
+.jp-textarea:focus {
+  border-color: var(--jp-primary);
+  box-shadow: 0 0 0 2px rgba(31, 166, 178, 0.15);
+  background: #ffffff;
+}
+
+.jp-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Upload area */
+.jp-upload-dropzone {
+  border: 1px dashed var(--jp-primary);
+  border-radius: var(--jp-radius-md);
+  padding: 16px 16px;
+  background: var(--jp-primary-light);
+  color: var(--jp-navy);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.jp-upload-file-input {
+  display: inline-block;
+}
+
+.jp-upload-selected {
+  font-size: 13px;
+}
+
+/* Buttons */
+.jp-actions {
+  margin-top: 14px;
+}
+
+.jp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s ease, transform 0.05s ease,
+    box-shadow 0.18s ease, opacity 0.15s ease;
+}
+
+.jp-button-primary {
+  background: var(--jp-primary);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 138, 149, 0.28);
+}
+
+.jp-button-primary:hover {
+  background: var(--jp-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(15, 138, 149, 0.32);
+}
+
+.jp-button-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(15, 138, 149, 0.25);
+}
+
+.jp-button-ghost {
+  background: transparent;
+  color: var(--jp-text-muted);
+}
+
+.jp-button[disabled] {
+  cursor: default;
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+/* Status text */
+.jp-status {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--jp-text-muted);
+}
+
+/* Upload details */
+.jp-upload-details {
+  margin-top: 16px;
+  border-top: 1px solid var(--jp-border);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jp-upload-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.jp-meta-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--jp-text-muted);
+}
+
+.jp-meta-value {
+  display: block;
+  font-size: 14px;
+  color: var(--jp-text);
+}
+
+/* Chips */
+.jp-skill-chips {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.jp-chip {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eef3f7;
+  font-size: 12px;
+  color: var(--jp-text);
+}
+
+.jp-chip-muted {
+  background: #eef3f7;
+}
+
+.jp-chip-good {
+  background: rgba(46, 204, 113, 0.16);
+  color: #1d8a4d;
+}
+
+.jp-chip-bad {
+  background: rgba(231, 76, 60, 0.12);
+  color: #c0392b;
+}
+
+/* Alerts */
+.jp-alert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.jp-alert-error {
+  background: rgba(231, 76, 60, 0.08);
+  color: #c0392b;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.jp-alert-info {
+  background: rgba(52, 152, 219, 0.07);
+  color: #2574a9;
+  border: 1px solid rgba(52, 152, 219, 0.25);
+}
+
+/* Match result */
+.jp-match-result {
+  margin-top: 18px;
+  border-top: 1px solid var(--jp-border);
+  padding-top: 14px;
+}
+
+.jp-match-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--jp-navy);
+}
+
+.jp-match-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.jp-metric {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #f3f7fb;
+  border: 1px solid var(--jp-border);
+}
+
+.jp-metric-label {
+  display: block;
+  font-size: 12px;
+  color: var(--jp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.jp-metric-value {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--jp-navy);
+}
+
+/* Match details grids */
+.jp-match-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .jp-form-grid--two-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .jp-match-details {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .jp-match-details > div {
+    flex: 1;
+  }
+}
