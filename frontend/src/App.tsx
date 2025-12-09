@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import "./App.css";
-import logo from "./assets/jobpilot-logo.png"; // <- save your logo here
+import logo from "./assets/jobpilot-logo.png";
 
 const API_BASE = "http://127.0.0.1:8000";
 
@@ -13,6 +13,18 @@ interface CvUploadResponse {
 }
 
 interface JobMatchResponse {
+  cv_id: string;
+  job_title: string;
+  company: string;
+  match_score: number;
+  semantic_score: number;
+  skill_score: number;
+  job_skills: string[];
+  overlapping_skills: string[];
+  missing_skills: string[];
+}
+
+interface TrackedJob {
   cv_id: string;
   job_title: string;
   company: string;
@@ -36,6 +48,10 @@ function App() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // NEW: tracked jobs state
+  const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
 
   // ---- Upload CV ----
   const handleUploadCv = async () => {
@@ -63,6 +79,7 @@ function App() {
 
       setCvInfo(res.data);
       setMatchResult(null); // clear old result
+      setTrackedJobs([]);   // clear old history for previous CV
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.detail || "Error uploading CV");
@@ -99,11 +116,39 @@ function App() {
       );
 
       setMatchResult(res.data);
+
+      // after a successful match, refresh tracked jobs
+      await loadTrackedJobs();
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.detail || "Error matching job");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ---- Load tracked jobs for this CV ----
+  const loadTrackedJobs = async () => {
+    if (!cvInfo) {
+      setError("Upload a CV first to load tracked jobs for that cv_id.");
+      return;
+    }
+
+    try {
+      setError(null);
+      setJobsLoading(true);
+
+      const res = await axios.get<TrackedJob[]>(
+        `${API_BASE}/jobs/history/${cvInfo.cv_id}`
+      );
+
+      console.log("Tracked jobs:", res.data);
+      setTrackedJobs(res.data);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.detail || "Error loading tracked jobs");
+    } finally {
+      setJobsLoading(false);
     }
   };
 
@@ -356,6 +401,74 @@ function App() {
             )}
           </div>
         </section>
+
+        {/* ===== 3. TRACKED JOBS SECTION ===== */}
+        <section className="jp-section">
+          <div className="jp-section-header">
+            <span className="jp-section-step">3</span>
+            <div>
+              <div className="jp-section-title">Tracked jobs</div>
+              <div className="jp-section-subtitle">
+                View jobs you’ve already matched for this CV.
+              </div>
+            </div>
+          </div>
+
+          <div className="jp-card">
+            {!cvInfo && (
+              <p className="jp-hint">
+                Upload a CV first so we can load jobs associated with its{" "}
+                <code>cv_id</code>.
+              </p>
+            )}
+
+            <div className="jp-actions">
+              <button
+                className="jp-button jp-button-primary"
+                onClick={loadTrackedJobs}
+                disabled={!cvInfo || jobsLoading}
+              >
+                {jobsLoading ? "Loading..." : "Load tracked jobs"}
+              </button>
+            </div>
+
+            {trackedJobs.length === 0 && cvInfo && !jobsLoading && (
+              <p className="jp-hint" style={{ marginTop: 10 }}>
+                No tracked jobs yet for this CV. Run a match to create one.
+              </p>
+            )}
+
+            {trackedJobs.length > 0 && (
+              <div className="jp-match-result" style={{ marginTop: 16 }}>
+                <table className="jobs-table">
+                  <thead>
+                    <tr>
+                      <th>Job Title</th>
+                      <th>Company</th>
+                      <th>Match %</th>
+                      <th>Semantic</th>
+                      <th>Overlap</th>
+                      <th>Missing Skills</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trackedJobs.map((job, index) => (
+                      <tr key={index}>
+                        <td>{job.job_title}</td>
+                        <td>{job.company}</td>
+                        <td>{job.match_score.toFixed(1)}</td>
+                        <td>{job.semantic_score.toFixed(3)}</td>
+                        <td>{job.overlapping_skills.join(", ") || "None"}</td>
+                        <td>{job.missing_skills.join(", ") || "None"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+
       </main>
     </div>
   );
