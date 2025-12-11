@@ -1,183 +1,146 @@
 🚀 JobPilot – Your AI Job Search Co-Pilot
 
-JobPilot is an AI-powered job application assistant that helps users upload their CV, analyze skills, match job descriptions, and generate tailored cover letters.
-It acts as an intelligent co-pilot to navigate the job search process faster and more effectively.
+JobPilot is an AI-enhanced job application assistant that helps users upload their CV, analyse job descriptions, match skills, and generate tailored cover letters.
+It is built with FastAPI, React + TypeScript, MongoDB, and integrates with semantic AI models.
 
-This project includes both the FastAPI backend and the Vite + React frontend.
+✨ Current MVP Features (v1)
+1. CV Upload & Parsing
 
-📌 Features
-🔹 CV Upload & Parsing
+  Upload PDF CVs
+  
+  Automatic extraction of skills & experience
+  
+  Stored in MongoDB with unique cv_id
+  
+  Display parsed skills in UI
 
-Upload PDF CVs.
+2. AI Job Matching Engine
 
-Automatic text extraction and skill detection.
+  Compare CV against job description
+  
+  Compute:
+  
+  Match Score
+  
+  Skill Score
+  
+  Semantic Score
+  
+  Highlight:
+  
+  Overlapping skills
+  
+  Missing skills
 
-Secure storage of parsed data in MongoDB.
+3. Tracked Jobs Dashboard
 
-🔹 AI Job Matching Engine
+  Save job matches automatically
+  
+  View all tracked matches for each CV
+  
+  See match scores, skills, missing skills
+  
+  Delete tracked jobs
+  
+  Fully working backend + UI
 
-Compares CV skills against job descriptions.
+4. Cover Letter Generator (Template-Based v1)
 
-Computes:
+  Generates structured cover letters
+  
+  Supports tones (professional, friendly, confident)
+  
+  Letters are editable in UI
+  
+  OpenAI integration planned for v2
 
-Match Score
+🧱 Tech Stack
+Backend (FastAPI)
 
-Skill Score
+Python 3.10+
 
-Semantic Score
+FastAPI
 
-Highlights:
+PDFMiner / PyPDF2 (CV parsing)
 
-Overlapping skills
+OpenAI API (planned upgrade)
 
-Missing skills
+MongoDB (skills, job history, CV store)
 
-Extracted job keywords
+Pydantic Models
 
-🔹 Cover Letter Generator
+Frontend (React + TypeScript)
 
-Generates professional cover letters tailored to the job.
+React + TS
 
-Supports multiple tones and formatting options.
+Vite
 
-🔹 Job Tracking
+Axios
 
-Saves previous job matches in the database.
+Custom JobPilot UI theme
 
-View job match history.
-
-Delete tracked jobs.
-
-🔹 Frontend UI (Vite + React)
-
-Upload CV page
-
-Job match form
-
-Results display
-
-Clean modern UI matching the JobPilot brand
-
-🛠️ Tech Stack
-Backend
-
-🐍 Python 3.10+
-
-⚡ FastAPI
-
-📄 PyPDF2 / PDFMiner (CV parsing)
-
-🧠 OpenAI API (Semantic scoring & cover letters)
-
-🍃 MongoDB (Data storage)
-
-🔑 Pydantic models
-
-Frontend
-
-⚛️ React + TypeScript
-
-⚡ Vite
-
-🎨 Custom CSS (JobPilot UI theme)
-
-🔗 Axios (API calls)
+Responsive layout
 
 📂 Project Structure
 job-pilot/
 │
-├── app/                 # Backend FastAPI application
-│   ├── api/             # Routes (CV upload, job matching, cover letters)
-│   ├── schemas/         # Pydantic models
-│   ├── services/        # Business logic (matching, CV parsing)
-│   └── database.py      # MongoDB connection
+├── app/                # FastAPI backend
+│   ├── api/            # Routes (upload, match, cover letters)
+│   ├── schemas/        # Pydantic models
+│   ├── services/       # Business logic
+│   └── database.py     # MongoDB connection
 │
-├── main.py              # FastAPI entry point
-├── requirements.txt     # Backend dependencies
-│
-├── frontend/            # Vite + React frontend
+├── frontend/           # React frontend
 │   ├── src/
 │   ├── public/
-│   ├── package.json
 │   └── vite.config.js
 │
-└── README.md            # This file
+└── README.md
 
-⚙️ Setup Instructions
-1️⃣ Backend Setup
-cd job-pilot
-pip install -r requirements.txt
-uvicorn main:app --reload
+🌱 Upcoming Features (v2 Roadmap)
+🔜 OpenAI-powered Cover Letters
 
+Generate highly personalised, role-aware letters
 
-Backend runs at:
+Understand job description context (FE, BE, Support, Cloud, etc.)
 
-👉 http://127.0.0.1:8000
+Replace template-based generator
 
-Swagger Docs:
-👉 http://127.0.0.1:8000/docs
+🔜 UI Refactor
 
-2️⃣ Frontend Setup
-cd frontend
-npm install
-npm run dev
+Split large App.tsx into components
 
+Improve code readability and maintainability
 
-Frontend runs at:
+🔜 Job Tracker Enhancements
 
-👉 http://localhost:5173
+Auto-refresh job list after match
 
-🔌 API Endpoints (Summary)
-CV
-Method	Endpoint	Description
-POST	/upload_cv	Upload CV (PDF)
-Job Matching
-Method	Endpoint	Description
-POST	/jobs/match	Compute job match scores
-GET	/jobs/history/{cv_id}	Get job match history
-GET	/jobs	List all tracked jobs
-DELETE	/jobs/{job_id}	Delete a tracked job
-Cover Letters
-Method	Endpoint	Description
-POST	/cover-letter/generate	Generate cover letter
-🎨 JobPilot Branding
+Add timestamps and sorting
 
-Primary Color: #1A8FBF
-Secondary Color: #06384A
-Accent: #12D4A6
+“Applied / Interview / Rejected” statuses
 
-Typography & UI are designed to match the JobPilot logo and brand identity.
+🔜 Authentication (Optional)
 
-🧱 Current Status
+Multi-user support
 
-This repository contains:
+Save CVs + history per account
 
-✔ Fully working backend (CV parsing, matching, history)
+🔜 Deployment
 
-✔ Early-stage frontend (upload CV + job match UI)
+Backend → Render / Railway
 
-✔ Clean project structure ready to deploy or extend
+Frontend → Netlify / Vercel
 
-✔ Full GitHub integration and version control
-
-🛣️ Roadmap
-
-🔲 Cover letter UI page
-
-🔲 “Saved Jobs” dashboard
-
-🔲 Add user authentication (optional)
-
-🔲 Deploy backend to Render / Railway
-
-🔲 Deploy frontend to Netlify / Vercel
-
-🔲 Chrome extension for auto-applying
-
-🔲 Make JobPilot a fully automated job assistant
+Public live demo link
 
 👤 Author
 
 Grant Sodipo
 AI Developer • Full-Stack Engineer • Tech Innovator
+
 GitHub: https://github.com/Gsodipo
+
+🚀 Status
+
+JobPilot v1 MVP is fully functional and now entering polish + AI-enhancement phase.
