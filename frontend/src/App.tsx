@@ -24,6 +24,10 @@ interface JobMatchResponse {
   missing_skills: string[];
 }
 
+interface CoverLetterResponse {
+  cover_letter: string;
+}
+
 interface TrackedJob {
   cv_id: string;
   job_title: string;
@@ -52,6 +56,12 @@ function App() {
   // NEW: tracked jobs state
   const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
+
+  const [tone, setTone] = useState<"professional" | "friendly" | "confident">(
+  "professional"
+  );
+  const [coverLetter, setCoverLetter] = useState("");
+  const [coverLoading, setCoverLoading] = useState(false);
 
   // ---- Upload CV ----
   const handleUploadCv = async () => {
@@ -151,6 +161,50 @@ function App() {
       setJobsLoading(false);
     }
   };
+
+  const handleGenerateCoverLetter = async () => {
+  if (!cvInfo) {
+    setError("Upload a CV first so we know which cv_id to use.");
+    return;
+  }
+
+  // you can either reuse the match form fields or require them
+  if (!jobTitle || !company || !jobDescription) {
+    setError(
+      "Fill in job title, company and job description to generate a cover letter."
+    );
+    return;
+  }
+
+  try {
+    setError(null);
+    setCoverLoading(true);
+    setCoverLetter("");
+
+    const payload = {
+      cv_id: cvInfo.cv_id,
+      job_title: jobTitle,
+      company,
+      job_description: jobDescription,
+      tone, // "professional" | "friendly" | ...
+    };
+
+    const res = await axios.post<CoverLetterResponse>(
+      `${API_BASE}/cover-letter/generate`,
+      payload
+    );
+
+    setCoverLetter(res.data.cover_letter);
+  } catch (err: any) {
+    console.error(err);
+    setError(
+      err.response?.data?.detail || "Error generating cover letter"
+    );
+  } finally {
+    setCoverLoading(false);
+  }
+};
+
 
   return (
     <div className="jp-app">
@@ -469,6 +523,77 @@ function App() {
           </div>
         </section>
 
+        {/* ===== 4. COVER LETTER SECTION ===== */}
+        <section className="jp-section">
+          <div className="jp-section-header">
+            <span className="jp-section-step">4</span>
+            <div>
+              <div className="jp-section-title">Generate cover letter</div>
+              <div className="jp-section-subtitle">
+                Use your CV and the job description to generate a tailored cover letter.
+              </div>
+            </div>
+          </div>
+
+          <div className="jp-card">
+            {!cvInfo && (
+              <p className="jp-hint">
+                Upload a CV first so we can use its <code>cv_id</code> for the cover letter.
+              </p>
+            )}
+
+            <div className="jp-form-grid jp-form-grid--two-col">
+              <div className="jp-form-row">
+                <label className="jp-label">Tone</label>
+                <select
+                  className="jp-input"
+                  value={tone}
+                  onChange={(e) =>
+                    setTone(e.target.value as "professional" | "friendly" | "confident")
+                  }
+                >
+                  <option value="professional">Professional</option>
+                  <option value="friendly">Friendly</option>
+                  <option value="confident">Confident</option>
+                </select>
+                <span className="jp-hint">
+                  Choose how you want the letter to sound.
+                </span>
+              </div>
+            </div>
+
+            <div className="jp-actions" style={{ marginTop: 14 }}>
+              <button
+                className="jp-button jp-button-primary"
+                onClick={handleGenerateCoverLetter}
+                disabled={!cvInfo || coverLoading}
+              >
+                {coverLoading ? "Generating…" : "Generate cover letter"}
+              </button>
+            </div>
+
+            {coverLetter && (
+              <div className="jp-match-result" style={{ marginTop: 16 }}>
+                <span className="jp-meta-label">Generated cover letter</span>
+                <textarea
+                  className="jp-textarea"
+                  style={{ marginTop: 8, minHeight: 220 }}
+                  value={coverLetter}
+                  readOnly
+                />
+                <div className="jp-actions" style={{ marginTop: 10 }}>
+                  <button
+                    className="jp-button jp-button-ghost"
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(coverLetter)}
+                  >
+                    Copy to clipboard
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );
