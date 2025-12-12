@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 from app.api.cv_routes import router as cv_router  # 👈 NEW
 from app.api.job_routes import router as job_router 
 from app.api.cover_letter_routes import router as cover_letter_router
