@@ -144,3 +144,20 @@ GitHub: https://github.com/Gsodipo
 🚀 Status
 
 JobPilot v1 MVP is fully functional and now entering polish + AI-enhancement phase.
+
+## AI Cover Letter Generation
+
+JobPilot can generate tailored cover letters using OpenAI.
+
+Features:
+- Uses CV data + job description
+- Prevents skill hallucination
+- Falls back to template if OpenAI fails
+- Supports tone selection
+- Honest handling of missing skills
+
+### Setup
+Create a `.env` file:
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4o-mini
+
