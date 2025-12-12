@@ -21,3 +21,9 @@ def get_client() -> AsyncIOMotorClient:
 def get_database():
     mongo_client = get_client()
     return mongo_client[MONGO_DB_NAME]
+
+
+# ✅ ADD THESE LINES
+db = get_database()
+cvs_collection = db["cvs"]
+jobs_collection = db["jobs"]
