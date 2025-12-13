@@ -94,9 +94,12 @@ body {
 }
 
 .jp-section-step {
-  width: 28px;
+  min-width: 28px;
   height: 28px;
+  padding: 0 10px;
   border-radius: 999px;
+  white-space: nowrap;
+
   background: var(--jp-primary-light);
   color: var(--jp-primary-dark);
   display: inline-flex;
@@ -105,6 +108,8 @@ body {
   font-size: 13px;
   font-weight: 600;
 }
+
+
 
 .jp-section-title {
   font-size: 18px;
@@ -164,6 +169,9 @@ body {
   outline: none;
   transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   background: #fbfdff;
+  width: 100%;
+  max-width: none;
+
 }
 
 .jp-input:focus,
@@ -381,18 +389,57 @@ body {
   gap: 12px;
 }
 
+/* ===== Option B: Whole-page two column layout ===== */
+.jp-layout {
+  display: grid;
+  grid-template-columns: 1fr 460px; /* right column width */   /* mobile */
+  gap: 24px;
+  align-items: start;
+}
+
+.jp-left {
+  min-width: 0;
+}
+
+.jp-right {
+  min-width: 0;
+  position: sticky;
+  top: 92px; /* header height + spacing */
+}
+
+.jp-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.jobs-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px; /* forces horizontal scroll instead of squashing */
+}
+
+.jobs-table th,
+.jobs-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--jp-border);
+  text-align: left;
+  font-size: 13px;
+  vertical-align: top;
+}
+
+
 /* Responsive */
-@media (min-width: 768px) {
+@media (max-width: 900px) {
   .jp-form-grid--two-col {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
-  .jp-match-details {
-    flex-direction: row;
-    gap: 20px;
+  .jp-layout {
+    grid-template-columns: 1fr;
   }
 
-  .jp-match-details > div {
-    flex: 1;
+  .jp-right {
+    position: static;
   }
 }
+
