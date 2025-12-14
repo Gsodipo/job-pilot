@@ -404,8 +404,12 @@ body {
 .jp-right {
   min-width: 0;
   position: sticky;
-  top: 92px; /* header height + spacing */
+  top: 92px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+  padding-right: 6px;
 }
+
 
 .jp-table-scroll {
   overflow-x: auto;
