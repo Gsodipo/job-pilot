@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useRef,useState } from "react";
 import "./App.css";
 import logo from "./assets/jobpilot-logo.png";
+
 
 import type {
   CvUploadResponse,
@@ -17,7 +18,10 @@ import MatchResultCard from "./components/MatchResultCard";
 import TrackedJobsCard from "./components/TrackedJobsCard";
 import CoverLetterOutputCard from "./components/CoverLetterOutputCard";
 
+
 export default function App() {
+  const rightPanelRef = useRef<HTMLDivElement | null>(null);
+
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvInfo, setCvInfo] = useState<CvUploadResponse | null>(null);
 
@@ -39,6 +43,10 @@ export default function App() {
     useState<"openai" | "template" | null>(null);
   const [coverLetterNote, setCoverLetterNote] = useState<string | null>(null);
   const [coverLoading, setCoverLoading] = useState(false);
+
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [coverCache, setCoverCache] = useState<Record<string, string>>({});
+
 
   const cvReady = !!cvInfo;
 
@@ -126,10 +134,6 @@ export default function App() {
       setError(null);
       setCoverLoading(true);
 
-      setCoverLetter("");
-      setCoverLetterMode(null);
-      setCoverLetterNote(null);
-
       const data = await generateCoverLetter({
         cv_id: cvInfo.cv_id,
         job_title: jobTitle,
@@ -141,6 +145,11 @@ export default function App() {
       setCoverLetter(data.cover_letter);
       setCoverLetterMode(data.mode);
       setCoverLetterNote(data.note ?? null);
+
+      // ✅ save it for the currently selected/active tracked job (if there is one)
+      if (selectedJobId) {
+        setCoverCache((prev) => ({ ...prev, [selectedJobId]: data.cover_letter }));
+      } 
     } catch (err: any) {
       setError(err.response?.data?.detail || "Error generating cover letter");
     } finally {
@@ -149,22 +158,27 @@ export default function App() {
   };
 
 const handleViewTrackedJob = (job: TrackedJob) => {
-  console.log("VIEW CLICKED (App):", job);
+  setSelectedJobId(job.id);
 
-  // Update right panel content
   setMatchResult(job as any);
-
-  // Refill left form (optional but good UX)
   setJobTitle(job.job_title);
   setCompany(job.company);
+  setJobDescription(job.job_description);
 
-  // ✅ Scroll ONLY the right panel to the top
+  // ✅ restore the cached cover letter for this job (if it exists)
+  setCoverLetter(coverCache[job.id] ?? "");
+  setCoverLetterMode(null);
+  setCoverLetterNote(null);
+
   setTimeout(() => {
-    document
-      .getElementById("right-panel")
-      ?.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
   }, 50);
 };
+
+
+
+
+
 
 
   return (
@@ -228,7 +242,7 @@ const handleViewTrackedJob = (job: TrackedJob) => {
             )}
           </div>
 
-          <div className="jp-right" id="right-panel">
+          <div className="jp-right" ref={rightPanelRef}>
             <MatchResultCard matchResult={matchResult} />
 
             <TrackedJobsCard
