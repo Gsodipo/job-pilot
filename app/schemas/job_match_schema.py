@@ -19,11 +19,13 @@ class JobMatchResponse(BaseModel):
     cv_id: str
     job_title: Optional[str]
     company: Optional[str]
+    job_description: str  # ✅ ADD THIS
 
-    match_score: float  # 0–100
-    semantic_score: float  # 0–1
-    skill_score: float  # 0–1
+    match_score: float
+    semantic_score: float
+    skill_score: float
 
     job_skills: List[str]
     overlapping_skills: List[str]
     missing_skills: List[str]
+
