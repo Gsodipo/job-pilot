@@ -16,6 +16,7 @@ class JobMatchRequest(BaseModel):
 
 
 class JobMatchResponse(BaseModel):
+    id: str
     cv_id: str
     job_title: Optional[str]
     company: Optional[str]

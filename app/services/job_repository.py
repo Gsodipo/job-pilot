@@ -93,3 +93,21 @@ async def delete_tracked_job(job_id: str) -> bool:
 
     result = await db["tracked_jobs"].delete_one({"_id": oid})
     return result.deleted_count == 1
+
+
+async def save_cover_letter(doc: Dict[str, Any]) -> str:
+    db = get_database()
+    doc["created_at"] = datetime.utcnow()
+    res = await db["cover_letters"].insert_one(doc)
+    return str(res.inserted_id)
+
+async def get_latest_cover_letter_by_job_id(job_id: str) -> Optional[Dict[str, Any]]:
+    db = get_database()
+    cursor = db["cover_letters"].find({"job_id": job_id}).sort("created_at", -1).limit(1)
+    results = await cursor.to_list(length=1)
+    if not results:
+        return None
+    doc = results[0]
+    doc["id"] = str(doc["_id"])
+    del doc["_id"]
+    return doc

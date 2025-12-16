@@ -61,9 +61,11 @@ async def match_job(payload: JobMatchRequest):
         job_skills=job_skills,
     )
 
-    # 🔹 NEW: log this match in MongoDB
-    result_dict["job_description"] = job_description  # ✅ add this
-    await save_job_match(result_dict)
+    result_dict["job_description"] = job_description
+    inserted_id = await save_job_match(result_dict)
+
+    # ✅ add id so response_model validation passes
+    result_dict["id"] = inserted_id
 
     return result_dict
 
