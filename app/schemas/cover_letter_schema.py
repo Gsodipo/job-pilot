@@ -13,9 +13,10 @@ class CoverLetterRequest(BaseModel):
     )
 
 
-class CoverLetterResponse(BaseModel):
+class CoverLetterRequest(BaseModel):
     cv_id: str
+    job_id: Optional[str] = None  # ✅ ADD THIS
     job_title: str
     company: str
-    tone: str
-    cover_letter: str
+    job_description: str
+    tone: Optional[str] = "professional"

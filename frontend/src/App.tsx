@@ -112,6 +112,7 @@ export default function App() {
       });
 
       setMatchResult(data);
+      setSelectedJobId((data as any).id); // once backend returns id properly
 
       setCoverLetter("");
       setCoverLetterMode(null);
@@ -173,6 +174,10 @@ const handleViewTrackedJob = (job: TrackedJob) => {
   setTimeout(() => {
     document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
   }, 50);
+
+  console.log("clicked job id:", job.id);
+  console.log("coverCache keys:", Object.keys(coverCache));
+
 };
 
 
