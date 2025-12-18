@@ -111,3 +111,58 @@ async def get_latest_cover_letter_by_job_id(job_id: str) -> Optional[Dict[str, A
     doc["id"] = str(doc["_id"])
     del doc["_id"]
     return doc
+
+# app/services/job_repository.py
+async def update_tracked_job(job_id: str, update: Dict[str, Any]) -> bool:
+    db = get_database()
+    try:
+        oid = ObjectId(job_id)
+    except Exception:
+        return False
+
+    # remove None fields
+    update = {k: v for k, v in update.items() if v is not None}
+    if not update:
+        return False
+
+    res = await db["tracked_jobs"].update_one({"_id": oid}, {"$set": update})
+    return res.matched_count == 1
+
+async def upsert_tracked_job_from_match(match_data: Dict[str, Any]) -> str:
+    db = get_database()
+
+    key = {
+        "cv_id": match_data["cv_id"],
+        "job_title": match_data.get("job_title"),
+        "company": match_data.get("company"),
+    }
+
+    update_doc = {
+        "$set": {
+            "cv_id": match_data["cv_id"],
+            "job_title": match_data.get("job_title"),
+            "company": match_data.get("company"),
+            "job_description": match_data.get("job_description"),
+            "match_score": match_data.get("match_score"),
+            "semantic_score": match_data.get("semantic_score"),
+            "skill_score": match_data.get("skill_score"),
+            "job_skills": match_data.get("job_skills", []),
+            "overlapping_skills": match_data.get("overlapping_skills", []),
+            "missing_skills": match_data.get("missing_skills", []),
+        },
+        "$setOnInsert": {
+            "created_at": datetime.utcnow(),
+            "status": "saved",
+            "notes": "",
+        },
+    }
+
+    res = await db["tracked_jobs"].update_one(key, update_doc, upsert=True)
+
+    # return the doc id as string
+    if res.upserted_id:
+        return str(res.upserted_id)
+
+    # if it was an update, fetch the existing doc id
+    doc = await db["tracked_jobs"].find_one(key, {"_id": 1})
+    return str(doc["_id"])
