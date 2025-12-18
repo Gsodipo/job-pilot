@@ -9,7 +9,8 @@ import type {
   TrackedJob,
 } from "./types";
 
-import { uploadCv, matchJob, loadHistory, generateCoverLetter } from "./api/endpoints";
+import { uploadCv, matchJob, loadTrackedJobs, generateCoverLetter, getLatestCoverLetter } from "./api/endpoints";
+
 
 import UploadCvCard from "./components/UploadCvCard";
 import JobMatchCard from "./components/JobMatchCard";
@@ -72,21 +73,22 @@ export default function App() {
     }
   };
 
-  const handleLoadTrackedJobs = async () => {
-    if (!cvInfo) return setError("Upload a CV first to load tracked jobs.");
+const handleLoadTrackedJobs = async () => {
+  if (!cvInfo) return setError("Upload a CV first to load tracked jobs.");
 
-    try {
-      setError(null);
-      setJobsLoading(true);
+  try {
+    setError(null);
+    setJobsLoading(true);
 
-      const data = await loadHistory(cvInfo.cv_id);
-      setTrackedJobs(data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Error loading tracked jobs");
-    } finally {
-      setJobsLoading(false);
-    }
-  };
+    const data = await loadTrackedJobs(cvInfo.cv_id);
+    setTrackedJobs(data);
+  } catch (err: any) {
+    setError(err.response?.data?.detail || "Error loading tracked jobs");
+  } finally {
+    setJobsLoading(false);
+  }
+};
+
 
   const canGenerate =
   !!cvInfo &&
@@ -112,8 +114,8 @@ export default function App() {
       });
 
       setMatchResult(data);
-      setSelectedJobId((data as any).id); // once backend returns id properly
-
+     // setSelectedJobId((data as any).id); // once backend returns id properly
+      setSelectedJobId(null);
       setCoverLetter("");
       setCoverLetterMode(null);
       setCoverLetterNote(null);
@@ -127,6 +129,7 @@ export default function App() {
   };
 
   const handleGenerateCoverLetter = async () => {
+    if (!selectedJobId) return setError("Select a tracked job (click View) before generating a cover letter.");
     if (!cvInfo) return setError("Upload a CV first so we know which cv_id to use.");
     if (!jobTitle || !company || !jobDescription)
       return setError("Fill in job title, company and job description to generate a cover letter.");
@@ -137,11 +140,13 @@ export default function App() {
 
       const data = await generateCoverLetter({
         cv_id: cvInfo.cv_id,
+        job_id: selectedJobId!, 
         job_title: jobTitle,
         company,
         job_description: jobDescription,
         tone,
       });
+
 
       setCoverLetter(data.cover_letter);
       setCoverLetterMode(data.mode);
@@ -158,27 +163,53 @@ export default function App() {
     }
   };
 
-const handleViewTrackedJob = (job: TrackedJob) => {
+
+const handleViewTrackedJob = async (job: TrackedJob) => {
   setSelectedJobId(job.id);
 
-  setMatchResult(job as any);
   setJobTitle(job.job_title);
   setCompany(job.company);
-  setJobDescription(job.job_description);
+  setJobDescription(job.job_description ?? "");
 
-  // ✅ restore the cached cover letter for this job (if it exists)
-  setCoverLetter(coverCache[job.id] ?? "");
+  // Clear UI while loading
+  setCoverLetter("");
   setCoverLetterMode(null);
   setCoverLetterNote(null);
+  setMatchResult(null);
 
-  setTimeout(() => {
-    document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
-  }, 50);
+  if (!cvInfo) return setError("Upload a CV first.");
+  if (!job.job_description) return setError("This tracked job is missing a job description.");
 
-  console.log("clicked job id:", job.id);
-  console.log("coverCache keys:", Object.keys(coverCache));
+  try {
+    setError(null);
+    setLoading(true);
 
+    // 1) refresh match result for UI consistency
+    const data = await matchJob({
+      cv_id: cvInfo.cv_id,
+      job_title: job.job_title,
+      company: job.company,
+      job_description: job.job_description,
+    });
+    setMatchResult(data);
+
+    // 2) ✅ load the saved cover letter for THIS tracked job id
+    const saved = await getLatestCoverLetter(job.id);
+    setCoverLetter(saved.cover_letter ?? "");
+    setCoverLetterMode((saved.mode as any) ?? null);
+    setCoverLetterNote(saved.note ?? null);
+
+    setTimeout(() => {
+      document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  } catch (err: any) {
+    setError(err.response?.data?.detail || "Error loading tracked job");
+  } finally {
+    setLoading(false);
+  }
 };
+
+
 
 
 

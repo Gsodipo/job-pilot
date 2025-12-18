@@ -1,29 +1,49 @@
 import type { TrackedJob } from "../types";
+import { updateTrackedJob, deleteTrackedJob } from "../api/endpoints";
 
 type Props = {
   cvReady: boolean;
   jobsLoading: boolean;
   trackedJobs: TrackedJob[];
   onLoad: () => void;
-  onView: (job: TrackedJob) => void; // ✅ NEW
+  onView: (job: TrackedJob) => void;
 };
+
+const STATUS_OPTIONS = [
+  { value: "saved", label: "Saved" },
+  { value: "applied", label: "Applied" },
+  { value: "interview", label: "Interview" },
+  { value: "offer", label: "Offer" },
+  { value: "rejected", label: "Rejected" },
+];
 
 export default function TrackedJobsCard({
   cvReady,
   jobsLoading,
   trackedJobs,
   onLoad,
-  onView, // ✅ NEW
+  onView,
 }: Props) {
+  const handleStatusChange = async (jobId: string, status: string) => {
+    await updateTrackedJob(jobId, { status });
+    await onLoad();
+  };
+
+  const handleDelete = async (jobId: string) => {
+    const ok = window.confirm("Delete this tracked job?");
+    if (!ok) return;
+
+    await deleteTrackedJob(jobId);
+    await onLoad();
+  };
+
   return (
     <section className="jp-section">
       <div className="jp-section-header">
         <span className="jp-section-step">History</span>
         <div>
           <div className="jp-section-title">Tracked jobs</div>
-          <div className="jp-section-subtitle">
-            Jobs you’ve already matched for this CV.
-          </div>
+          <div className="jp-section-subtitle">Jobs you’ve already matched for this CV.</div>
         </div>
       </div>
 
@@ -46,29 +66,46 @@ export default function TrackedJobsCard({
                   <tr>
                     <th>Job Title</th>
                     <th>Company</th>
-                    <th>Match %</th>
-                    <th>Semantic</th>
-                    <th>Overlap</th>
-                    <th>Missing</th>
-                    <th></th> {/* ✅ actions column */}
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {trackedJobs.map((job, index) => (
-                    <tr key={index}>
+                  {trackedJobs.map((job) => (
+                    <tr key={job.id}>
                       <td>{job.job_title}</td>
                       <td>{job.company}</td>
-                      <td>{job.match_score.toFixed(1)}</td>
-                      <td>{job.semantic_score.toFixed(3)}</td>
-                      <td>{job.overlapping_skills.join(", ") || "None"}</td>
-                      <td>{job.missing_skills.join(", ") || "None"}</td>
+
                       <td>
+                        <select
+                          className="jp-input"
+                          value={job.status?.trim() ? job.status : "saved"}
+                          onChange={(e) => handleStatusChange(job.id, e.target.value)}
+                        >
+                          {STATUS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
+                      <td style={{ display: "flex", gap: 8 }}>
                         <button
                           className="jp-button jp-button-ghost"
                           type="button"
                           onClick={() => onView(job)}
                         >
                           View
+                        </button>
+
+                        <button
+                          className="jp-button jp-button-ghost"
+                          type="button"
+                          onClick={() => handleDelete(job.id)}
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -77,6 +114,12 @@ export default function TrackedJobsCard({
               </table>
             </div>
           </div>
+        )}
+
+        {trackedJobs.length === 0 && cvReady && !jobsLoading && (
+          <p className="jp-hint" style={{ marginTop: 10 }}>
+            No tracked jobs yet. Run a match to create one.
+          </p>
         )}
       </div>
     </section>
