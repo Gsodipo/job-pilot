@@ -15,10 +15,12 @@ from app.services.job_repository import (
     create_tracked_job,
     delete_tracked_job,
     update_tracked_job,
+    upsert_tracked_job_from_match,  
 )
 
 router = APIRouter(prefix="/jobs", tags=["Job Matching"])
 job_matcher = JobMatcherService()
+
 
 
 @router.post("/match", response_model=JobMatchResponse)
@@ -31,7 +33,10 @@ async def match_job(payload: JobMatchRequest):
     cv_skills = cv_doc.get("skills", [])
 
     if not cv_text:
-        raise HTTPException(status_code=400, detail="Stored CV does not contain parsed text.")
+        raise HTTPException(
+            status_code=400,
+            detail="Stored CV does not contain parsed text.",
+        )
 
     job_description = payload.job_description
     job_skills = extract_skills_from_text(job_description)
@@ -49,19 +54,26 @@ async def match_job(payload: JobMatchRequest):
     # Save match history
     result_dict["job_description"] = job_description
     match_id = await save_job_match(result_dict)
-    result_dict["id"] = match_id  # for response_model
 
-    # ✅ ALSO create a tracked job (so status/delete works)
-    await create_tracked_job({
+    # Prevent duplicate tracked jobs
+    tracked_job_id = await upsert_tracked_job_from_match({
         "cv_id": payload.cv_id,
         "job_title": payload.job_title,
         "company": payload.company,
-        "status": "saved",
         "job_description": job_description,
-        "job_match_id": match_id,
+        **result_dict,
     })
 
+    # Return IDs for frontend
+    result_dict["match_id"] = match_id
+    result_dict["tracked_job_id"] = tracked_job_id
+
+    # ✅ REQUIRED for response_model JobMatchResponse (FastAPI validation)
+    result_dict["id"] = match_id
+
     return result_dict
+
+
 
 
 @router.get("/history/{cv_id}", response_model=List[JobMatchResponse])
