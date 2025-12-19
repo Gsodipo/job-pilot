@@ -180,6 +180,14 @@ This project demonstrates how AI can be used responsibly to support — not repl
 
 ⸻
 
+## Current Features (v1.0)
+- CV upload and parsing
+- Job-to-CV matching with skill analysis
+- Job application tracker with status updates
+- Per-job AI-generated cover letters
+- Persistent job history
+
+
 👤 Author
 
 Grant Sodipo
