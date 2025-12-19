@@ -6,6 +6,9 @@ export interface CvUploadResponse {
 }
 
 export interface JobMatchResponse {
+  match_id?: string;
+  tracked_job_id?: string;
+
   cv_id: string;
   job_title: string;
   company: string;
@@ -16,6 +19,7 @@ export interface JobMatchResponse {
   overlapping_skills: string[];
   missing_skills: string[];
 }
+
 
 export interface TrackedJob {
   id: string;
@@ -33,6 +37,6 @@ export interface TrackedJob {
 
 export interface CoverLetterResponse {
   cover_letter: string;
-  mode: "openai" | "template";
+  mode: "openai" | "template" | "none"; // ✅ add none
   note?: string;
 }

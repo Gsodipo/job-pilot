@@ -41,7 +41,7 @@ export default function App() {
   const [tone, setTone] = useState("professional");
   const [coverLetter, setCoverLetter] = useState<string>("");
   const [coverLetterMode, setCoverLetterMode] =
-    useState<"openai" | "template" | null>(null);
+    useState<"openai" | "template" | "none" | null>(null);
   const [coverLetterNote, setCoverLetterNote] = useState<string | null>(null);
   const [coverLoading, setCoverLoading] = useState(false);
 
@@ -114,8 +114,7 @@ const handleLoadTrackedJobs = async () => {
       });
 
       setMatchResult(data);
-     // setSelectedJobId((data as any).id); // once backend returns id properly
-      setSelectedJobId(null);
+      setSelectedJobId(data.tracked_job_id ?? null); // ✅ key fix
       setCoverLetter("");
       setCoverLetterMode(null);
       setCoverLetterNote(null);

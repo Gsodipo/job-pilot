@@ -30,6 +30,9 @@ class JobMatchResponse(BaseModel):
     overlapping_skills: List[str]
     missing_skills: List[str]
 
+    match_id: Optional[str] = None
+    tracked_job_id: Optional[str] = None
+
 
 class JobUpdate(BaseModel):
     status: Optional[str] = None
