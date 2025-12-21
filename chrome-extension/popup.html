@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>JobPilot</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <h2>JobPilot</h2>
+
+      <label>CV ID</label>
+      <input id="cvId" placeholder="Paste cv_id once..." />
+      <button id="saveCvBtn">Save CV ID</button>
+
+      <hr />
+
+      <button id="extractBtn">Extract from page</button>
+
+      <label>Job Title</label>
+      <input id="jobTitle" placeholder="e.g. Data Analyst" />
+
+      <label>Company</label>
+      <input id="company" placeholder="e.g. Lidl" />
+
+      <label>Job Description</label>
+      <textarea id="jobDesc" rows="6" placeholder="Paste or extract job description..."></textarea>
+
+      <label>Tone</label>
+      <select id="tone">
+        <option value="professional" selected>Professional</option>
+        <option value="enthusiastic">Enthusiastic</option>
+        <option value="confident">Confident</option>
+      </select>
+
+      <hr />
+
+      <button id="saveBtn">Save tracked job</button>
+
+      <label>Tracked Job ID</label>
+      <input id="jobId" placeholder="Auto-filled after Save" readonly />
+
+      <button id="genBtn">Generate cover letter</button>
+
+      <label>Output</label>
+      <textarea id="output" rows="10" placeholder="Cover letter appears here..." readonly></textarea>
+
+      <p id="status" class="status"></p>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
