@@ -187,6 +187,12 @@ This project demonstrates how AI can be used responsibly to support — not repl
 - Per-job AI-generated cover letters
 - Persistent job history
 
+## Chrome Extension (MVP)
+- Extracts job title + job description from the current page
+- Stores `cv_id` locally so you don’t paste it every time
+- Known issue: company name extraction is not reliable across sites yet (DOM varies)
+
+
 
 👤 Author
 
