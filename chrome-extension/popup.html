@@ -12,16 +12,22 @@
 
       <label>CV ID</label>
       <input id="cvId" placeholder="Paste cv_id once..." />
-      <button id="saveCvBtn">Save CV ID</button>
+      <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <button id="saveCvBtn" style="flex:1;">Save CV ID</button>
+        <button id="clearBtn" class="jp-button-ghost" style="flex:1;">Reset</button>
+      </div>
 
       <hr />
 
-      <button id="extractBtn">Extract from page</button>
+      <div style="display:flex; gap:8px;">
+        <button id="extractBtn" style="flex:1;">Extract from page</button>
+        <button id="selectionBtn" style="flex:1;">Use selected text</button>
+      </div>
 
-      <label>Job Title</label>
+      <label style="margin-top:10px;">Job Title</label>
       <input id="jobTitle" placeholder="e.g. Data Analyst" />
 
-      <label>Company</label>
+      <label>Company <span style="opacity:.7">(optional)</span></label>
       <input id="company" placeholder="e.g. Lidl" />
 
       <label>Job Description</label>

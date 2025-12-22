@@ -2,7 +2,7 @@
   "name": "JobPilot Extension",
   "version": "1.0.0",
   "manifest_version": 3,
-  "permissions": ["activeTab", "storage", "scripting"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": ["http://127.0.0.1:8000/*"],
   "action": {
     "default_title": "JobPilot",
@@ -10,8 +10,21 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": [
+        "*://*.linkedin.com/*",
+
+        "*://*.indeed.com/*",
+        "*://*.indeed.ie/*",
+        "*://*.indeed.co.uk/*",
+        "*://ie.indeed.com/*",
+        "*://uk.indeed.com/*",
+
+        "*://*.glassdoor.com/*",
+        "*://*.glassdoor.ie/*",
+        "*://*.glassdoor.co.uk/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ]
 }

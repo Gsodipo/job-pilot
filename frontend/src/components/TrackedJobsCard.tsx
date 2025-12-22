@@ -68,6 +68,7 @@ export default function TrackedJobsCard({
                     <th>Company</th>
                     <th>Status</th>
                     <th>Actions</th>
+                    <th>Link</th>
                   </tr>
                 </thead>
 
@@ -108,6 +109,21 @@ export default function TrackedJobsCard({
                           Delete
                         </button>
                       </td>
+                      <td>
+                        {job.job_url ? (
+                          <a
+                            className="jp-button jp-button-ghost"
+                            href={job.job_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Open
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+
                     </tr>
                   ))}
                 </tbody>

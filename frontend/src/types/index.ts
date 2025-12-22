@@ -30,6 +30,10 @@ export interface TrackedJob {
   status?: string;
   notes?: string;
   job_match_id?: string;
+  
+  // ✅ ADD
+  job_url?: string;
+  source?: string;
 }
 
 
