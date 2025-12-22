@@ -39,6 +39,8 @@ async def match_job(payload: JobMatchRequest):
         )
 
     job_description = payload.job_description
+    job_url = payload.job_url
+    source = payload.source
     job_skills = extract_skills_from_text(job_description)
 
     result_dict = job_matcher.compute_match_result(
@@ -61,6 +63,8 @@ async def match_job(payload: JobMatchRequest):
         "job_title": payload.job_title,
         "company": payload.company,
         "job_description": job_description,
+        "job_url": job_url,
+        "source": source,
         **result_dict,
     })
 
@@ -70,6 +74,9 @@ async def match_job(payload: JobMatchRequest):
 
     # ✅ REQUIRED for response_model JobMatchResponse (FastAPI validation)
     result_dict["id"] = match_id
+    result_dict["job_url"] = job_url
+    result_dict["source"] = source
+
 
     return result_dict
 

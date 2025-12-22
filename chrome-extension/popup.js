@@ -3,7 +3,12 @@ const API_BASE = "http://127.0.0.1:8000";
 const $ = (id) => document.getElementById(id);
 
 function setStatus(text) {
-  $("status").innerText = text;
+  $("status").innerText = text || "";
+}
+
+function setWarn(text) {
+  // lightweight “warning” using same status area
+  $("status").innerText = text || "";
 }
 
 async function loadCvIdFromStorage() {
@@ -26,27 +31,68 @@ async function getActiveTab() {
   return tab;
 }
 
+function ensureTabCanReceiveMessages(tab) {
+  if (!tab?.id) throw new Error("No active tab found.");
+  const url = tab.url || "";
+  // Chrome blocks content scripts on internal pages
+  if (url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:")) {
+    throw new Error("Cannot extract from browser internal pages.");
+  }
+}
+
 async function extractFromPage() {
   const tab = await getActiveTab();
+  ensureTabCanReceiveMessages(tab);
+
   const res = await chrome.tabs.sendMessage(tab.id, { type: "JP_EXTRACT_JOB" });
-  if (!res?.ok) throw new Error("Could not extract job from page.");
+  if (!res?.ok) throw new Error(res?.error || "Could not extract job from page.");
 
   $("jobTitle").value = res.job.job_title || "";
   $("company").value = res.job.company || "";
   $("jobDesc").value = res.job.job_description || "";
-  setStatus("Extracted job info ✅");
+
+  if (!res.job.company) {
+    setWarn("Extracted ✅ Company not found — type it in (common on some sites).");
+  } else {
+    setStatus("Extracted job info ✅");
+  }
+}
+
+async function useSelectedText() {
+  const tab = await getActiveTab();
+  ensureTabCanReceiveMessages(tab);
+
+  const res = await chrome.tabs.sendMessage(tab.id, { type: "JP_GET_SELECTION" });
+  if (!res?.ok || !res.text) throw new Error("No text selected. Highlight the job description on the page first.");
+
+  $("jobDesc").value = res.text || "";
+  setStatus("Inserted selected text into Job Description ✅");
+}
+
+function getFormValues() {
+  return {
+    cv_id: $("cvId").value.trim(),
+    job_title: $("jobTitle").value.trim(),
+    company: $("company").value.trim(),
+    job_description: $("jobDesc").value.trim(),
+    tone: $("tone").value,
+    job_id: $("jobId").value.trim(),
+  };
 }
 
 async function saveTrackedJobViaMatch() {
-  const cv_id = $("cvId").value.trim();
-  const job_title = $("jobTitle").value.trim();
-  const company = $("company").value.trim();
-  const job_description = $("jobDesc").value.trim();
+  const { cv_id, job_title, company, job_description } = getFormValues();
 
   if (!cv_id) throw new Error("cv_id is required.");
-  if (!job_title || !company || !job_description) throw new Error("Missing job fields.");
+  if (!job_title) throw new Error("Job Title is required (extract or type it).");
+  if (!job_description) throw new Error("Job Description is required (extract/paste/select text).");
 
-  setStatus("Saving tracked job (running match)...");
+  // Company is allowed to be empty — but we warn
+  if (!company) {
+    setWarn("Saving… (Company is empty — you can still save, but add it for best results.)");
+  } else {
+    setStatus("Saving tracked job (running match)…");
+  }
 
   const r = await fetch(`${API_BASE}/jobs/match`, {
     method: "POST",
@@ -61,23 +107,24 @@ async function saveTrackedJobViaMatch() {
 
   const data = await r.json();
 
-  // IMPORTANT: backend should return tracked_job_id
   $("jobId").value = data.tracked_job_id || "";
-  setStatus(`Saved ✅ tracked_job_id: ${data.tracked_job_id}`);
+  setStatus(`Saved ✅ tracked_job_id: ${data.tracked_job_id || "(missing from backend response)"}`);
 }
 
 async function generateCoverLetter() {
-  const cv_id = $("cvId").value.trim();
-  const job_id = $("jobId").value.trim();
-  const job_title = $("jobTitle").value.trim();
-  const company = $("company").value.trim();
-  const job_description = $("jobDesc").value.trim();
-  const tone = $("tone").value;
+  const { cv_id, job_id, job_title, company, job_description, tone } = getFormValues();
 
   if (!cv_id) throw new Error("cv_id is required.");
   if (!job_id) throw new Error("tracked job_id is required (click Save tracked job first).");
+  if (!job_title) throw new Error("Job Title is required.");
+  if (!job_description) throw new Error("Job Description is required.");
 
-  setStatus("Generating cover letter...");
+  // company optional, but recommended
+  if (!company) {
+    setWarn("Generating… (Company is empty — letter may look generic. Consider filling it.)");
+  } else {
+    setStatus("Generating cover letter…");
+  }
 
   const r = await fetch(`${API_BASE}/cover-letter/generate`, {
     method: "POST",
@@ -93,7 +140,19 @@ async function generateCoverLetter() {
   const data = await r.json();
 
   $("output").value = data.cover_letter || "";
-  setStatus(`Done ✅ (${data.mode})`);
+  setStatus(`Done ✅ (${data.mode || "template"})`);
+}
+
+function resetForm(keepCvId = true) {
+  const cv = $("cvId").value;
+  $("jobTitle").value = "";
+  $("company").value = "";
+  $("jobDesc").value = "";
+  $("jobId").value = "";
+  $("output").value = "";
+  if (!keepCvId) $("cvId").value = "";
+  setStatus("Cleared ✅");
+  if (keepCvId) $("cvId").value = cv;
 }
 
 // ---- wire up buttons ----
@@ -121,6 +180,15 @@ $("extractBtn").addEventListener("click", async () => {
   }
 });
 
+$("selectionBtn").addEventListener("click", async () => {
+  try {
+    setStatus("");
+    await useSelectedText();
+  } catch (e) {
+    setStatus(e.message);
+  }
+});
+
 $("saveBtn").addEventListener("click", async () => {
   try {
     setStatus("");
@@ -138,3 +206,5 @@ $("genBtn").addEventListener("click", async () => {
     setStatus(e.message);
   }
 });
+
+$("clearBtn").addEventListener("click", () => resetForm(true));

@@ -135,6 +135,9 @@ async def upsert_tracked_job_from_match(match_data: Dict[str, Any]) -> str:
         "cv_id": match_data["cv_id"],
         "job_title": match_data.get("job_title"),
         "company": match_data.get("company"),
+        "job_url": match_data.get("job_url"),
+        "source": match_data.get("source"),
+
     }
 
     update_doc = {
