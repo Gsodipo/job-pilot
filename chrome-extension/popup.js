@@ -26,6 +26,17 @@ async function saveCvIdToStorage() {
   setStatus("Saved CV ID ✅");
 }
 
+async function resetAll() {
+  // remove saved cv id from storage
+  await chrome.storage.local.remove(["cv_id"]);
+
+  // clear UI fields (including cvId)
+  resetForm(false);
+
+  setStatus("Reset ✅ (CV ID cleared)");
+}
+
+
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   return tab;
@@ -207,4 +218,12 @@ $("genBtn").addEventListener("click", async () => {
   }
 });
 
-$("clearBtn").addEventListener("click", () => resetForm(true));
+$("clearBtn").addEventListener("click", async () => {
+  try {
+    setStatus("");
+    await resetAll();
+  } catch (e) {
+    setStatus(e.message);
+  }
+});
+
