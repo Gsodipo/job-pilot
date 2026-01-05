@@ -46,7 +46,8 @@ export default function App() {
   const [coverLoading, setCoverLoading] = useState(false);
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [coverCache, setCoverCache] = useState<Record<string, string>>({});
+  const [, setCoverCache] = useState<Record<string, string>>({});
+
 
 
   const cvReady = !!cvInfo;
