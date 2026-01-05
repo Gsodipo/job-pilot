@@ -8,3 +8,4 @@ pydantic
 python-multipart  
 scikit-learn
 numpy
+openai>=1.0.0
