@@ -7,11 +7,8 @@ def parse_pdf(file_bytes: bytes) -> str:
     """
     Take raw PDF bytes and return the combined text from all pages.
     """
-    # create an in-memory stream
-    pdf_stream = io.BytesIO(file_bytes)
-
-    # open with fitz
-    doc = fitz.open(stream=pdf_stream, filetype="pdf")
+    # IMPORTANT: pass bytes directly (not BytesIO)
+    doc = fitz.open(stream=file_bytes, filetype="pdf")
 
     all_text = []
     for page in doc:
@@ -20,8 +17,6 @@ def parse_pdf(file_bytes: bytes) -> str:
             all_text.append(text)
 
     doc.close()
-
-    # join pages and clean up whitespace a bit
     return "\n".join(all_text).strip()
 
 # Simple skill vocabulary for now (you can expand this)
