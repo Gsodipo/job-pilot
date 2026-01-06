@@ -1,4 +1,5 @@
-const API_BASE = "http://127.0.0.1:8000";
+// ✅ popup.js (updated) — uses stored api_base if present, otherwise defaults to Render
+const DEFAULT_API_BASE = "https://job-pilot-f8sd.onrender.com";
 
 const $ = (id) => document.getElementById(id);
 
@@ -7,8 +8,12 @@ function setStatus(text) {
 }
 
 function setWarn(text) {
-  // lightweight “warning” using same status area
   $("status").innerText = text || "";
+}
+
+async function getApiBase() {
+  const { api_base } = await chrome.storage.local.get(["api_base"]);
+  return (api_base || DEFAULT_API_BASE).replace(/\/+$/, ""); // trim trailing slashes
 }
 
 async function loadCvIdFromStorage() {
@@ -27,15 +32,10 @@ async function saveCvIdToStorage() {
 }
 
 async function resetAll() {
-  // remove saved cv id from storage
   await chrome.storage.local.remove(["cv_id"]);
-
-  // clear UI fields (including cvId)
   resetForm(false);
-
   setStatus("Reset ✅ (CV ID cleared)");
 }
-
 
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -45,8 +45,11 @@ async function getActiveTab() {
 function ensureTabCanReceiveMessages(tab) {
   if (!tab?.id) throw new Error("No active tab found.");
   const url = tab.url || "";
-  // Chrome blocks content scripts on internal pages
-  if (url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:")) {
+  if (
+    url.startsWith("chrome://") ||
+    url.startsWith("edge://") ||
+    url.startsWith("about:")
+  ) {
     throw new Error("Cannot extract from browser internal pages.");
   }
 }
@@ -74,7 +77,8 @@ async function useSelectedText() {
   ensureTabCanReceiveMessages(tab);
 
   const res = await chrome.tabs.sendMessage(tab.id, { type: "JP_GET_SELECTION" });
-  if (!res?.ok || !res.text) throw new Error("No text selected. Highlight the job description on the page first.");
+  if (!res?.ok || !res.text)
+    throw new Error("No text selected. Highlight the job description on the page first.");
 
   $("jobDesc").value = res.text || "";
   setStatus("Inserted selected text into Job Description ✅");
@@ -96,19 +100,21 @@ async function saveTrackedJobViaMatch() {
 
   if (!cv_id) throw new Error("cv_id is required.");
   if (!job_title) throw new Error("Job Title is required (extract or type it).");
-  if (!job_description) throw new Error("Job Description is required (extract/paste/select text).");
+  if (!job_description)
+    throw new Error("Job Description is required (extract/paste/select text).");
 
-  // Company is allowed to be empty — but we warn
   if (!company) {
     setWarn("Saving… (Company is empty — you can still save, but add it for best results.)");
   } else {
     setStatus("Saving tracked job (running match)…");
   }
 
+  const API_BASE = await getApiBase();
+
   const r = await fetch(`${API_BASE}/jobs/match`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cv_id, job_title, company, job_description })
+    body: JSON.stringify({ cv_id, job_title, company, job_description }),
   });
 
   if (!r.ok) {
@@ -130,17 +136,18 @@ async function generateCoverLetter() {
   if (!job_title) throw new Error("Job Title is required.");
   if (!job_description) throw new Error("Job Description is required.");
 
-  // company optional, but recommended
   if (!company) {
     setWarn("Generating… (Company is empty — letter may look generic. Consider filling it.)");
   } else {
     setStatus("Generating cover letter…");
   }
 
+  const API_BASE = await getApiBase();
+
   const r = await fetch(`${API_BASE}/cover-letter/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cv_id, job_id, job_title, company, job_description, tone })
+    body: JSON.stringify({ cv_id, job_id, job_title, company, job_description, tone }),
   });
 
   if (!r.ok) {
@@ -226,4 +233,3 @@ $("clearBtn").addEventListener("click", async () => {
     setStatus(e.message);
   }
 });
-

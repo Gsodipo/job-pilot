@@ -2,11 +2,14 @@ import os
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# Load variables from .env
+# Load variables from .env (local only)
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "jobpilot")
+
+if not MONGO_URI:
+    raise RuntimeError("MONGO_URI environment variable is not set")
 
 client: AsyncIOMotorClient | None = None
 
@@ -23,7 +26,7 @@ def get_database():
     return mongo_client[MONGO_DB_NAME]
 
 
-# ✅ ADD THESE LINES
+# collections
 db = get_database()
 cvs_collection = db["cvs"]
 jobs_collection = db["jobs"]
