@@ -19,6 +19,9 @@ origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 
+    # ✅ Vercel frontend
+    "https://job-pilot-beta.vercel.app",
+
     # ✅ JobPilot Chrome Extension
     "chrome-extension://kdnjioofncjahajjofjokjcekldeac",
 ]
