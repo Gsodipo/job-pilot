@@ -99,6 +99,66 @@ This is a **fully deployed, production-style system**, not a mock project.
   - **Use selected text** for complex layouts
 
 ---
+## 🚀 Quick Start (Web App + Chrome Extension)
+
+This project is designed to be used with both the **web app** and the **Chrome extension** working together.
+
+### Step 1 — Upload Your CV (Web App)
+1. Open the JobPilot web app
+2. Upload a PDF CV
+3. Copy the generated `cv_id`
+
+> The `cv_id` links all tracked jobs and cover letters to your CV.
+
+---
+
+### Step 2 — Save the CV ID (Chrome Extension)
+1. Open the JobPilot Chrome extension
+2. Paste your `cv_id`
+3. Click **Save CV ID**
+
+> This only needs to be done once per browser.
+
+---
+
+### Step 3 — Extract & Save a Job (Job Board)
+1. Open a job listing on LinkedIn / Indeed / Glassdoor
+2. Open the Chrome extension
+3. Click **Extract from page**
+   - Or use **Use selected text** if extraction fails
+4. Click **Save tracked job**
+
+> This saves the job and runs the matching engine automatically.
+
+---
+
+### Step 4 — Generate a Cover Letter
+- Use either:
+  - The **web app**, or
+  - The **Chrome extension**
+- Select a tone and generate a tailored cover letter
+
+---
+### Step 5 — View Tracked Jobs (Web App)
+
+1. Return to the JobPilot web app
+2. Click **Load Tracked Jobs**
+3. Your saved job will appear in the tracked jobs list
+
+> From here, you can view match results, generate cover letters, and manage application status.
+
+---
+### Step 6 — View a Tracked Job
+
+1. In the **Tracked Jobs** section, click **View** on any saved job
+2. JobPilot will:
+   - Reload the job details
+   - Re-run the match analysis
+   - Display the latest match results
+   - Load the most recent cover letter (if one exists)
+
+> This allows you to revisit previous applications and continue where you left off.
+
 
 ## 🧠 Architecture
 
