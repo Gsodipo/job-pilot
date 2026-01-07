@@ -1,5 +1,10 @@
 # 🚀 JobPilot — AI Job Search Co-Pilot
 
+![Web App](https://img.shields.io/badge/Web%20App-Live-brightgreen)
+![API](https://img.shields.io/badge/API-Production-blue)
+![Chrome Extension](https://img.shields.io/badge/Chrome%20Extension-Developer%20Preview-orange)
+
+
 **JobPilot** is an AI-powered job application assistant that streamlines the job search process by combining CV parsing, job matching, job tracking, and AI-assisted cover letter generation into a single end-to-end workflow.
 
 **Status:** Portfolio-ready functional prototype (v1.0)
@@ -97,6 +102,8 @@ This is a **fully deployed, production-style system**, not a mock project.
 - Includes fallbacks:
   - **Extract from page**
   - **Use selected text** for complex layouts
+
+> The Chrome extension is available as a **Developer Preview** and can be installed locally via Chrome Developer Mode.
 
 ---
 ## 🚀 Quick Start (Web App + Chrome Extension)
