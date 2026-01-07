@@ -86,24 +86,54 @@ This is a **fully deployed, production-style system**, not a mock project.
 
 ---
 
-## 🧩 Chrome Extension (MVP)
+## 🧩 Chrome Extension (Developer Preview)
 
-- Works directly on:
-  - LinkedIn
-  - Indeed
-  - Glassdoor
-- Extracts:
-  - Job title
-  - Job description
-- Stores `cv_id` locally (entered once)
-- Communicates with the deployed backend to:
-  - Save tracked jobs
-  - Generate cover letters
-- Includes fallbacks:
-  - **Extract from page**
-  - **Use selected text** for complex layouts
+> The JobPilot Chrome extension is currently available as a **Developer Preview** and must be installed manually using Chrome Developer Mode.
 
-> The Chrome extension is available as a **Developer Preview** and can be installed locally via Chrome Developer Mode.
+### Installation
+
+1. Open Google Chrome and navigate to:
+chrome://extensions
+
+2. Enable **Developer mode** (toggle in the top-right corner).
+
+3. Click **Load unpacked**.
+
+4. Select the `chrome-extension/` folder from this repository.
+
+5. The JobPilot extension will now appear in your extensions list and is ready to use.
+
+---
+
+### Supported Job Sites
+
+The extension currently works best on:
+
+- **LinkedIn**
+- **Indeed** (partial support depending on layout)
+- **Glassdoor** (manual text selection recommended)
+
+> Job platforms frequently change their DOM structure, so extraction accuracy may vary.
+
+---
+
+### How It Works
+
+- The Chrome extension communicates directly with the **production JobPilot backend API**.
+- Your `cv_id` is stored locally so it only needs to be entered once.
+- All job data, matches, and cover letters are saved via the backend — no sensitive data is stored by the extension itself.
+
+---
+
+### Why Developer Preview?
+
+The extension is intentionally distributed this way because:
+
+- It is an early-access feature
+- It allows rapid iteration without Chrome Web Store review delays
+- This approach is commonly used for **internal tools, demos, and engineering previews**
+
+A public Chrome Web Store release may be considered in the future.
 
 ---
 ## 🚀 Quick Start (Web App + Chrome Extension)
@@ -234,14 +264,6 @@ cd frontend
 npm install
 npm run dev
 
-Chrome Extension
-  - Open chrome://extensions
-  
-  - Enable Developer mode
-  
-  - Click Load unpacked
-  
-  - Select the chrome-extension/ folder
 
 ⚠️ Known Limitations
   - Job site DOM structures change frequently
