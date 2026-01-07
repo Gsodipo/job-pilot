@@ -1,269 +1,215 @@
-🚀 JobPilot — AI Job Search Co-Pilot
+# 🚀 JobPilot — AI Job Search Co-Pilot
 
-JobPilot is an AI-powered job application assistant that helps candidates streamline their job search by combining CV parsing, job matching, job tracking, and cover letter generation into a single, end-to-end workflow.
+**JobPilot** is an AI-powered job application assistant that streamlines the job search process by combining CV parsing, job matching, job tracking, and AI-assisted cover letter generation into a single end-to-end workflow.
 
-This project was built as a real-world, production-style system, not a demo — and is fully deployed with a live frontend, backend API, database, and Chrome extension.
+**Status:** Portfolio-ready functional prototype (v1.0)
 
-Status: Portfolio-ready functional prototype (v1.0)
+---
 
-✨ Core Features
-📄 CV Upload & Parsing
+## ✨ Overview
 
-Upload a PDF CV
+JobPilot helps candidates:
 
-Automatically extracts:
+- Upload and parse CVs
+- Match CVs against real job descriptions
+- Track job applications
+- Generate tailored cover letters
+- Save jobs directly from job boards using a Chrome extension
 
-Skills
+This is a **fully deployed, production-style system**, not a mock project.
 
-Experience highlights
+---
 
-Stores CV data with a unique cv_id
+## 📄 CV Upload & Parsing
 
-Displays detected skills in the UI
+- Upload a **PDF CV**
+- Automatically extracts:
+  - Skills
+  - Experience highlights
+- Generates a unique `cv_id`
+- Stores parsed CV data in MongoDB
+- Displays detected skills in the UI
 
-CV data persists across sessions
+---
 
-🔍 Job Matching Engine
+## 🔍 Job Matching Engine
 
-Paste or extract job descriptions
+- Paste or extract a job description
+- Computes:
+  - Overall Match Score
+  - Semantic Similarity Score
+  - Skill Match Score
+- Highlights:
+  - Job-required skills
+  - Overlapping skills
+  - Missing skills
+- Each match is:
+  - Persisted
+  - Linked to a CV
+  - Tracked over time
 
-Computes:
+---
 
-Overall Match Score
+## 🗂 Tracked Job History
 
-Semantic Similarity Score
+- Persistent job tracking per `cv_id`
+- Displays:
+  - Job title
+  - Company
+  - Match percentage
+  - Application status  
+    *(Saved · Applied · Interview · Offer · Rejected)*
+- Supported actions:
+  - View previous matches
+  - Update application status
+  - Delete tracked jobs
 
-Skill Match Score
+---
 
-Highlights:
+## ✍️ AI Cover Letter Generator
 
-Required job skills
+- Generates tailored cover letters using:
+  - CV content
+  - Job description
+  - Selected tone *(Professional / Enthusiastic / Confident)*
+- Uses OpenAI API when available
+- Automatic template fallback if AI is unavailable
+- Safety features:
+  - Prevents hallucinated skills
+  - Uses “willingness to learn” language for missing skills
+- Copy-to-clipboard support
 
-Overlapping skills
+---
 
-Missing skills
+## 🧩 Chrome Extension (MVP)
 
-Each job match is saved and tracked per CV
+- Works directly on:
+  - LinkedIn
+  - Indeed
+  - Glassdoor
+- Extracts:
+  - Job title
+  - Job description
+- Stores `cv_id` locally (entered once)
+- Communicates with the deployed backend to:
+  - Save tracked jobs
+  - Generate cover letters
+- Includes fallbacks:
+  - **Extract from page**
+  - **Use selected text** for complex layouts
 
-🗂 Tracked Job History
+---
 
-Persistent job tracking by cv_id
+## 🧠 Architecture
 
-Displays:
-
-Job title
-
-Company
-
-Match percentage
-
-Application status
-(Saved · Applied · Interview · Offer · Rejected)
-
-Actions:
-
-View previous matches
-
-Update application status
-
-Delete tracked jobs
-
-✍️ AI Cover Letter Generator
-
-Generates tailored cover letters using:
-
-CV content
-
-Job description
-
-Selected tone (Professional / Enthusiastic / Confident)
-
-Uses OpenAI API when available
-
-Safe fallback to structured templates if AI is unavailable
-
-Guardrails:
-
-Avoids hallucinated skills
-
-Uses “willingness to learn” phrasing for missing skills
-
-Copy-to-clipboard support
-
-🧩 Chrome Extension (MVP)
-
-Works directly on job boards (e.g. LinkedIn, Indeed, Glassdoor)
-
-Extracts:
-
-Job title
-
-Job description
-
-Stores cv_id locally (entered once)
-
-Integrates with the deployed backend:
-
-Save tracked jobs
-
-Generate cover letters
-
-Includes fallbacks:
-
-“Extract from page”
-
-“Use selected text” for complex layouts
-
-🧠 High-Level Architecture
 Chrome Extension ─┐
-                  ├──▶ FastAPI Backend ───▶ MongoDB
+├──▶ FastAPI Backend ───▶ MongoDB Atlas
 React Frontend ───┘
 
+- Frontend and Chrome extension share the same backend API
+- All data is persisted centrally
+- Single source of truth via MongoDB
 
-Frontend and Chrome extension communicate with the same backend API
+---
 
-All data is persisted and shared across interfaces
+## 🛠 Tech Stack
 
-Single source of truth via MongoDB
+### Frontend
+- React (Vite)
+- TypeScript
 
-🛠 Tech Stack
-Frontend
+### Backend
+- Python 3
+- FastAPI
+- MongoDB Atlas
+- OpenAI API (optional)
 
-React (Vite)
+### Browser Extension
+- Chrome Extension (Manifest v3)
+- Content scripts + popup UI
+- Local storage for persistence
 
-TypeScript
+---
 
-Modular component architecture
+## 🎨 UX & Product Design
 
-Backend
+- Two-column layout:
+  - Left → Inputs & controls
+  - Right → Results, history, cover letter
+- Sticky results panel
+- Clear loading, empty, and error states
+- Buttons disabled to prevent invalid actions
+- Clean, reusable components
 
-Python 3
+---
 
-FastAPI
+## 🔐 Security & Configuration
 
-MongoDB (Atlas)
+- API keys stored in environment variables
+- `.env` excluded from version control
+- `.env.example` included
+- No secrets committed to GitHub
 
-OpenAI API (optional)
+---
 
-Browser Extension
+## ▶️ Run Locally
 
-Chrome Extension (Manifest v3)
+### Backend
 
-Content scripts + popup UI
-
-Local storage for persistence
-
-🎨 UX Highlights
-
-Clean two-column layout:
-
-Left: inputs & controls
-
-Right: results, history, cover letter
-
-Sticky results panel
-
-Clear loading, empty, and error states
-
-Button disabling to prevent invalid actions
-
-Reusable, maintainable component structure
-
-🔐 Security & Configuration
-
-API keys stored in environment variables
-
-.env excluded from version control
-
-.env.example included
-
-No secrets committed to GitHub
-
-▶️ Run Locally
-Backend
+```bash
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 
-Frontend
+Frontend:
 cd frontend
 npm install
 npm run dev
 
 Chrome Extension
-
-Open chrome://extensions
-
-Enable Developer mode
-
-Click Load unpacked
-
-Select the chrome-extension/ folder
+  - Open chrome://extensions
+  
+  - Enable Developer mode
+  
+  - Click Load unpacked
+  
+  - Select the chrome-extension/ folder
 
 ⚠️ Known Limitations
-
-Job site DOM structures change frequently
-
-LinkedIn extraction works best
-
-Indeed works partially depending on layout
-
-Glassdoor often requires manual text selection
-
-Company name extraction is not guaranteed across all sites
-
-These limitations are expected and documented due to frequent job board UI changes.
-
-🛣 Roadmap
-Short Term
-
-Persist generated cover letters per job
-
-View historical cover letters
-
-Export cover letters (.txt)
-
-Medium Term
-
-Backend validation hardening
-
-Basic API test coverage
-
-Improved empty states
-
-Long Term
-
-Public Chrome Web Store release
-
-User authentication
-
-Optional job API integrations (non-scraping)
+  - Job site DOM structures change frequently
+  
+  - LinkedIn extraction works best
+  
+  - Indeed works partially depending on layout
+  
+  - Glassdoor often requires manual text selection
+  
+  - Company name extraction is not guaranteed
+  
+  - These are expected limitations due to frequent UI changes on job platforms.
 
 💡 Why JobPilot?
-
-Job applications are repetitive, time-consuming, and poorly optimized.
-
-JobPilot demonstrates how AI can responsibly assist — not replace — human decision-making in the job search process.
-
-This project showcases:
-
-Full-stack system design
-
-API design & integration
-
-State management
-
-AI feature integration
-
-Real-world deployment & debugging
-
-End-to-end production thinking
+  - Job applications are repetitive, time-consuming, and inefficient.
+  
+  - JobPilot demonstrates how AI can be used responsibly to assist — not replace — human decision-making in the job search process.
+  
+ This project showcases:
+  
+  - Full-stack system design
+  
+  - API design & integration
+  
+  - State management
+  
+  - AI feature integration
+  
+  - Real-world deployment challenges
+  
+  - End-to-end production thinking
 
 👤 Author
-
 Grant Sodipo
 Aspiring Software Engineer / IT Professional
-Building real-world, portfolio-driven systems
 
-🔗 GitHub: https://github.com/Gsodipo
+GitHub: https://github.com/Gsodipo
