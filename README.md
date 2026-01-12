@@ -248,6 +248,9 @@ React Frontend ───┘
 - No secrets committed to GitHub
 
 ---
+Licensed under the MIT License.
+
+---
 
 ## ▶️ Run Locally
 
