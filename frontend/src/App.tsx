@@ -1,16 +1,16 @@
-import { useRef,useState } from "react";
+import { useRef, useState } from "react";
 import "./App.css";
 import logo from "./assets/jobpilot-logo.png";
 
+import type { CvUploadResponse, JobMatchResponse, TrackedJob } from "./types";
 
-import type {
-  CvUploadResponse,
-  JobMatchResponse,
-  TrackedJob,
-} from "./types";
-
-import { uploadCv, matchJob, loadTrackedJobs, generateCoverLetter, getLatestCoverLetter } from "./api/endpoints";
-
+import {
+  uploadCv,
+  matchJob,
+  loadTrackedJobs,
+  generateCoverLetter,
+  getLatestCoverLetter,
+} from "./api/endpoints";
 
 import UploadCvCard from "./components/UploadCvCard";
 import JobMatchCard from "./components/JobMatchCard";
@@ -19,8 +19,20 @@ import MatchResultCard from "./components/MatchResultCard";
 import TrackedJobsCard from "./components/TrackedJobsCard";
 import CoverLetterOutputCard from "./components/CoverLetterOutputCard";
 
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  SignIn,
+  SignUp,
+  SignedIn,
+  SignedOut,
+  RedirectToSignIn,
+  UserButton,
+} from "@clerk/clerk-react";
 
-export default function App() {
+/** ----------------------------
+ *  Protected App Shell (Signed-in)
+ *  ---------------------------- */
+function JobPilotDashboard() {
   const rightPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -40,15 +52,14 @@ export default function App() {
 
   const [tone, setTone] = useState("professional");
   const [coverLetter, setCoverLetter] = useState<string>("");
-  const [coverLetterMode, setCoverLetterMode] =
-    useState<"openai" | "template" | "none" | null>(null);
+  const [coverLetterMode, setCoverLetterMode] = useState<
+    "openai" | "template" | "none" | null
+  >(null);
   const [coverLetterNote, setCoverLetterNote] = useState<string | null>(null);
   const [coverLoading, setCoverLoading] = useState(false);
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [, setCoverCache] = useState<Record<string, string>>({});
-
-
 
   const cvReady = !!cvInfo;
 
@@ -74,29 +85,27 @@ export default function App() {
     }
   };
 
-const handleLoadTrackedJobs = async () => {
-  if (!cvInfo) return setError("Upload a CV first to load tracked jobs.");
+  const handleLoadTrackedJobs = async () => {
+    if (!cvInfo) return setError("Upload a CV first to load tracked jobs.");
 
-  try {
-    setError(null);
-    setJobsLoading(true);
+    try {
+      setError(null);
+      setJobsLoading(true);
 
-    const data = await loadTrackedJobs(cvInfo.cv_id);
-    setTrackedJobs(data);
-  } catch (err: any) {
-    setError(err.response?.data?.detail || "Error loading tracked jobs");
-  } finally {
-    setJobsLoading(false);
-  }
-};
-
+      const data = await loadTrackedJobs(cvInfo.cv_id);
+      setTrackedJobs(data);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Error loading tracked jobs");
+    } finally {
+      setJobsLoading(false);
+    }
+  };
 
   const canGenerate =
-  !!cvInfo &&
-  jobTitle.trim().length > 0 &&
-  company.trim().length > 0 &&
-  jobDescription.trim().length > 0;
-
+    !!cvInfo &&
+    jobTitle.trim().length > 0 &&
+    company.trim().length > 0 &&
+    jobDescription.trim().length > 0;
 
   const handleMatchJob = async () => {
     if (!cvInfo) return setError("Upload a CV first so we know which cv_id to use.");
@@ -115,7 +124,7 @@ const handleLoadTrackedJobs = async () => {
       });
 
       setMatchResult(data);
-      setSelectedJobId(data.tracked_job_id ?? null); // ✅ key fix
+      setSelectedJobId(data.tracked_job_id ?? null);
       setCoverLetter("");
       setCoverLetterMode(null);
       setCoverLetterNote(null);
@@ -129,7 +138,8 @@ const handleLoadTrackedJobs = async () => {
   };
 
   const handleGenerateCoverLetter = async () => {
-    if (!selectedJobId) return setError("Select a tracked job (click View) before generating a cover letter.");
+    if (!selectedJobId)
+      return setError("Select a tracked job (click View) before generating a cover letter.");
     if (!cvInfo) return setError("Upload a CV first so we know which cv_id to use.");
     if (!jobTitle || !company || !jobDescription)
       return setError("Fill in job title, company and job description to generate a cover letter.");
@@ -140,22 +150,20 @@ const handleLoadTrackedJobs = async () => {
 
       const data = await generateCoverLetter({
         cv_id: cvInfo.cv_id,
-        job_id: selectedJobId!, 
+        job_id: selectedJobId!,
         job_title: jobTitle,
         company,
         job_description: jobDescription,
         tone,
       });
 
-
       setCoverLetter(data.cover_letter);
       setCoverLetterMode(data.mode);
       setCoverLetterNote(data.note ?? null);
 
-      // ✅ save it for the currently selected/active tracked job (if there is one)
       if (selectedJobId) {
         setCoverCache((prev) => ({ ...prev, [selectedJobId]: data.cover_letter }));
-      } 
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || "Error generating cover letter");
     } finally {
@@ -163,59 +171,47 @@ const handleLoadTrackedJobs = async () => {
     }
   };
 
+  const handleViewTrackedJob = async (job: TrackedJob) => {
+    setSelectedJobId(job.id);
 
-const handleViewTrackedJob = async (job: TrackedJob) => {
-  setSelectedJobId(job.id);
+    setJobTitle(job.job_title);
+    setCompany(job.company);
+    setJobDescription(job.job_description ?? "");
 
-  setJobTitle(job.job_title);
-  setCompany(job.company);
-  setJobDescription(job.job_description ?? "");
+    setCoverLetter("");
+    setCoverLetterMode(null);
+    setCoverLetterNote(null);
+    setMatchResult(null);
 
-  // Clear UI while loading
-  setCoverLetter("");
-  setCoverLetterMode(null);
-  setCoverLetterNote(null);
-  setMatchResult(null);
+    if (!cvInfo) return setError("Upload a CV first.");
+    if (!job.job_description) return setError("This tracked job is missing a job description.");
 
-  if (!cvInfo) return setError("Upload a CV first.");
-  if (!job.job_description) return setError("This tracked job is missing a job description.");
+    try {
+      setError(null);
+      setLoading(true);
 
-  try {
-    setError(null);
-    setLoading(true);
+      const data = await matchJob({
+        cv_id: cvInfo.cv_id,
+        job_title: job.job_title,
+        company: job.company,
+        job_description: job.job_description,
+      });
+      setMatchResult(data);
 
-    // 1) refresh match result for UI consistency
-    const data = await matchJob({
-      cv_id: cvInfo.cv_id,
-      job_title: job.job_title,
-      company: job.company,
-      job_description: job.job_description,
-    });
-    setMatchResult(data);
+      const saved = await getLatestCoverLetter(job.id);
+      setCoverLetter(saved.cover_letter ?? "");
+      setCoverLetterMode((saved.mode as any) ?? null);
+      setCoverLetterNote(saved.note ?? null);
 
-    // 2) ✅ load the saved cover letter for THIS tracked job id
-    const saved = await getLatestCoverLetter(job.id);
-    setCoverLetter(saved.cover_letter ?? "");
-    setCoverLetterMode((saved.mode as any) ?? null);
-    setCoverLetterNote(saved.note ?? null);
-
-    setTimeout(() => {
-      document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
-    }, 50);
-  } catch (err: any) {
-    setError(err.response?.data?.detail || "Error loading tracked job");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
-
-
-
-
+      setTimeout(() => {
+        document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
+      }, 50);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Error loading tracked job");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="jp-app">
@@ -224,6 +220,11 @@ const handleViewTrackedJob = async (job: TrackedJob) => {
         <div>
           <div className="jp-header-title">JobPilot</div>
           <div className="jp-header-tagline">Your AI job search co-pilot</div>
+        </div>
+
+        {/* ✅ Clerk user menu */}
+        <div style={{ marginLeft: "auto" }}>
+          <UserButton afterSignOutUrl="/sign-in" />
         </div>
       </header>
 
@@ -267,13 +268,18 @@ const handleViewTrackedJob = async (job: TrackedJob) => {
               setTone={setTone}
               coverLoading={coverLoading}
               onGenerate={handleGenerateCoverLetter}
-              canGenerate={canGenerate} // ✅ add this
+              canGenerate={canGenerate}
             />
 
             {coverLetterMode && (
               <div className="jp-status" style={{ marginTop: -10 }}>
                 Mode: <code>{coverLetterMode}</code>
-                {coverLetterNote ? <> · <span className="jp-hint">{coverLetterNote}</span></> : null}
+                {coverLetterNote ? (
+                  <>
+                    {" "}
+                    · <span className="jp-hint">{coverLetterNote}</span>
+                  </>
+                ) : null}
               </div>
             )}
           </div>
@@ -286,14 +292,41 @@ const handleViewTrackedJob = async (job: TrackedJob) => {
               jobsLoading={jobsLoading}
               trackedJobs={trackedJobs}
               onLoad={handleLoadTrackedJobs}
-              onView={handleViewTrackedJob} // ✅ NEW
+              onView={handleViewTrackedJob}
             />
-
 
             <CoverLetterOutputCard coverLetter={coverLetter} />
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+/** ----------------------------
+ *  Router + Auth Gate
+ *  ---------------------------- */
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <SignedIn>
+                <JobPilotDashboard />
+              </SignedIn>
+              <SignedOut>
+                <RedirectToSignIn />
+              </SignedOut>
+            </>
+          }
+        />
+
+        <Route path="/sign-in/*" element={<SignIn routing="path" path="/sign-in" />} />
+        <Route path="/sign-up/*" element={<SignUp routing="path" path="/sign-up" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
