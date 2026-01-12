@@ -1,5 +1,22 @@
 import { api } from "./client";
 import type { CvUploadResponse, JobMatchResponse, TrackedJob, CoverLetterResponse } from "../types";
+import { useAuth } from "@clerk/clerk-react";
+
+
+export function useAuthedFetch() {
+  const { getToken } = useAuth();
+
+  return async (url: string, options: RequestInit = {}) => {
+    const token = await getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+}
 
 export async function uploadCv(file: File) {
   const formData = new FormData();
