@@ -224,7 +224,7 @@ function JobPilotDashboard() {
 
         {/* ✅ Clerk user menu */}
         <div style={{ marginLeft: "auto" }}>
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
