@@ -1,13 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
 load_dotenv()
 
 
-from app.api.cv_routes import router as cv_router  # 👈 NEW
+from app.api.cv_routes import router as cv_router  
+from app.api.auth_routes import router as auth_router
 from app.api.job_routes import router as job_router 
 from app.api.cover_letter_routes import router as cover_letter_router
+from app.core.auth import get_current_user_id
 
 
 app = FastAPI()
@@ -47,7 +49,12 @@ def health_check():
     return {"status": "ok", "app": "JobPilot backend is running 🎯"}
 
 
+@app.get("/me")
+def me(user_id: str = Depends(get_current_user_id)):
+    return {"user_id": user_id}
+
 # 👇 NEW: include CV routes
 app.include_router(cv_router, tags=["CV"])
 app.include_router(job_router)
 app.include_router(cover_letter_router) 
+app.include_router(auth_router, tags=["Auth"])

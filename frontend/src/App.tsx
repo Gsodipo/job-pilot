@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import "./App.css";
 import logo from "./assets/jobpilot-logo.png";
 
+
 import type { CvUploadResponse, JobMatchResponse, TrackedJob } from "./types";
 
 import {
@@ -33,6 +34,7 @@ import {
  *  Protected App Shell (Signed-in)
  *  ---------------------------- */
 function JobPilotDashboard() {
+
   const rightPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [cvFile, setCvFile] = useState<File | null>(null);
