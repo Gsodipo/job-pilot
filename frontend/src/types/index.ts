@@ -44,3 +44,20 @@ export interface CoverLetterResponse {
   mode: "openai" | "template" | "none"; // ✅ add none
   note?: string;
 }
+
+export type CoverLetterHistoryItem = {
+  id?: string;        // if your backend returns "id"
+  _id?: string;       // if your backend returns Mongo _id
+  job_id: string;
+  cv_id: string;
+
+  tone: string;
+  mode: "openai" | "template" | "none";
+  note?: string | null;
+
+  text?: string;              // if backend stores as "text"
+  cover_letter?: string;      // if backend returns as "cover_letter"
+
+  created_at: string; // ISO string
+};
+

@@ -198,39 +198,50 @@ function extractGeneric() {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  (async () => {
+  // ✅ Token bridge (for JobPilot tab)
+  if (msg?.type === "JP_GET_CLERK_TOKEN") {
     try {
-      if (msg.type === "JP_GET_SELECTION") {
-        const text = window.getSelection()?.toString()?.trim();
-        return sendResponse({ ok: !!text, text: text?.slice(0, 12000) || "" });
-      }
+      const tokenPromise =
+        window?.Clerk?.session?.getToken?.() ||
+        window?.Clerk?.getToken?.();
 
-      if (msg.type === "JP_EXTRACT_JOB") {
-        let job;
+      Promise.resolve(tokenPromise)
+        .then((token) => sendResponse({ ok: true, token }))
+        .catch((e) => sendResponse({ ok: false, error: String(e) }));
+    } catch (e) {
+      sendResponse({ ok: false, error: String(e) });
+    }
+    return true;
+  }
+
+  // ✅ Job extraction (LinkedIn / Indeed / Glassdoor)
+  if (msg?.type === "JP_EXTRACT_JOB") {
+    (async () => {
+      try {
+        let job = null;
 
         if (isLinkedIn()) job = await extractLinkedIn();
         else if (isIndeed()) job = await extractIndeed();
         else if (isGlassdoor()) job = await extractGlassdoor();
         else job = extractGeneric();
 
-        // Debug payload so you can see what site + what got extracted
-        return sendResponse({
-          ok: true,
-          job,
-          debug: {
-            host,
-            hasTitle: !!job.job_title,
-            hasCompany: !!job.company,
-            hasDesc: !!job.job_description
-          }
-        });
+        sendResponse({ ok: true, job });
+      } catch (e) {
+        sendResponse({ ok: false, error: String(e) });
       }
+    })();
+    return true;
+  }
 
-      return sendResponse({ ok: false, error: "Unknown message type" });
+  // ✅ Selected text helper
+  if (msg?.type === "JP_GET_SELECTION") {
+    try {
+      const text = cleanText(window.getSelection()?.toString() || "");
+      sendResponse({ ok: true, text });
     } catch (e) {
-      return sendResponse({ ok: false, error: String(e) });
+      sendResponse({ ok: false, error: String(e) });
     }
-  })();
-
-  return true;
+    return true;
+  }
 });
+

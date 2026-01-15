@@ -2,10 +2,12 @@
   "name": "JobPilot Extension",
   "version": "1.0.0",
   "manifest_version": 3,
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": [
     "http://127.0.0.1:8000/*",
-    "https://job-pilot-f8sd.onrender.com/*"
+    "https://job-pilot-beta.vercel.app/*",
+
+    "https://*.vercel.app/*"
   ],
   "action": {
     "default_title": "JobPilot",
@@ -24,7 +26,9 @@
 
         "*://*.glassdoor.com/*",
         "*://*.glassdoor.ie/*",
-        "*://*.glassdoor.co.uk/*"
+        "*://*.glassdoor.co.uk/*",
+
+        "https://*.vercel.app/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
