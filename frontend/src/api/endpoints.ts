@@ -50,6 +50,21 @@ export async function getLatestCoverLetter(jobId: string) {
   return res.data;
 }
 
+export type CoverLetterHistoryItem = {
+  id: string;
+  tone?: string;
+  mode?: string | null;
+  note?: string | null;
+  cover_letter: string;
+  created_at?: string;
+};
+
+export async function getCoverLetterHistory(jobId: string) {
+  const res = await api.get(`/cover-letter/history/${jobId}`);
+  return res.data; // array
+}
+
+
 // ✅ must be named exports
 export const updateTrackedJob = (jobId: string, payload: { status?: string; notes?: string }) =>
   api.patch(`/jobs/${jobId}`, payload);

@@ -19,6 +19,9 @@ import CoverLetterControls from "./components/CoverLetterControls";
 import MatchResultCard from "./components/MatchResultCard";
 import TrackedJobsCard from "./components/TrackedJobsCard";
 import CoverLetterOutputCard from "./components/CoverLetterOutputCard";
+import { getCoverLetterHistory } from "./api/endpoints";
+import type { CoverLetterHistoryItem } from "./types";
+
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {
@@ -59,6 +62,9 @@ function JobPilotDashboard() {
   >(null);
   const [coverLetterNote, setCoverLetterNote] = useState<string | null>(null);
   const [coverLoading, setCoverLoading] = useState(false);
+  const [coverHistory, setCoverHistory] = useState<CoverLetterHistoryItem[]>([]);
+  
+
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [, setCoverCache] = useState<Record<string, string>>({});
@@ -80,6 +86,7 @@ function JobPilotDashboard() {
       setCoverLetter("");
       setCoverLetterMode(null);
       setCoverLetterNote(null);
+      setCoverHistory([]);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Error uploading CV");
     } finally {
@@ -173,47 +180,52 @@ function JobPilotDashboard() {
     }
   };
 
-  const handleViewTrackedJob = async (job: TrackedJob) => {
-    setSelectedJobId(job.id);
+const handleViewTrackedJob = async (job: TrackedJob) => {
+  setSelectedJobId(job.id);
 
-    setJobTitle(job.job_title);
-    setCompany(job.company);
-    setJobDescription(job.job_description ?? "");
+  setJobTitle(job.job_title);
+  setCompany(job.company);
+  setJobDescription(job.job_description ?? "");
 
-    setCoverLetter("");
-    setCoverLetterMode(null);
-    setCoverLetterNote(null);
-    setMatchResult(null);
+  setCoverLetter("");
+  setCoverLetterMode(null);
+  setCoverLetterNote(null);
+  setMatchResult(null);
 
-    if (!cvInfo) return setError("Upload a CV first.");
-    if (!job.job_description) return setError("This tracked job is missing a job description.");
+  if (!cvInfo) return setError("Upload a CV first.");
+  if (!job.job_description) return setError("This tracked job is missing a job description.");
 
-    try {
-      setError(null);
-      setLoading(true);
+  try {
+    setError(null);
+    setLoading(true);
 
-      const data = await matchJob({
-        cv_id: cvInfo.cv_id,
-        job_title: job.job_title,
-        company: job.company,
-        job_description: job.job_description,
-      });
-      setMatchResult(data);
+    // 1️⃣ Refresh match result
+    const data = await matchJob({
+      cv_id: cvInfo.cv_id,
+      job_title: job.job_title,
+      company: job.company,
+      job_description: job.job_description,
+    });
+    setMatchResult(data);
 
-      const saved = await getLatestCoverLetter(job.id);
-      setCoverLetter(saved.cover_letter ?? "");
-      setCoverLetterMode((saved.mode as any) ?? null);
-      setCoverLetterNote(saved.note ?? null);
+    // 2️⃣ Load latest cover letter
+    const saved = await getLatestCoverLetter(job.id);
+    setCoverLetter(saved.cover_letter ?? "");
+    setCoverLetterMode((saved.mode as any) ?? null);
+    setCoverLetterNote(saved.note ?? null);
 
-      setTimeout(() => {
-        document.getElementById("match-result")?.scrollIntoView({ behavior: "smooth" });
-      }, 50);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Error loading tracked job");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // 3️⃣ ✅ LOAD COVER LETTER HISTORY (THIS IS STEP 4)
+    const history: CoverLetterHistoryItem[] = await getCoverLetterHistory(job.id);
+    setCoverHistory(history);
+
+
+  } catch (err: any) {
+    setError(err.response?.data?.detail || "Error loading tracked job");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="jp-app">
@@ -297,7 +309,15 @@ function JobPilotDashboard() {
               onView={handleViewTrackedJob}
             />
 
-            <CoverLetterOutputCard coverLetter={coverLetter} />
+            <CoverLetterOutputCard
+                coverLetter={coverLetter}
+                history={coverHistory}
+                onSelectHistory={(item) => {
+                  setCoverLetter(item.cover_letter ?? item.text ?? "");
+                  setCoverLetterMode(item.mode ?? null);
+                  setCoverLetterNote(item.note ?? null);
+                }}
+              />
           </div>
         </div>
       </main>
