@@ -11,6 +11,27 @@ function setWarn(text) {
   $("status").innerText = text || "";
 }
 
+const JOBPILOT_ORIGIN = "https://job-pilot-beta.vercel.app/"; // change this
+
+async function getJobPilotTabId() {
+  const tabs = await chrome.tabs.query({});
+  const jp = tabs.find(t => (t.url || "").startsWith(JOBPILOT_ORIGIN));
+  if (!jp?.id) throw new Error("Open JobPilot in a tab and sign in first.");
+  return jp.id;
+}
+
+async function getAuthHeader() {
+  const tabId = await getJobPilotTabId();
+  const res = await chrome.tabs.sendMessage(tabId, { type: "JP_GET_CLERK_TOKEN" });
+
+  if (!res?.ok || !res.token) {
+    throw new Error("Couldn’t get Clerk token. Make sure JobPilot tab is open + signed in.");
+  }
+
+  return { Authorization: `Bearer ${res.token}` };
+}
+
+
 async function getApiBase() {
   const { api_base } = await chrome.storage.local.get(["api_base"]);
   return (api_base || DEFAULT_API_BASE).replace(/\/+$/, ""); // trim trailing slashes
@@ -110,12 +131,17 @@ async function saveTrackedJobViaMatch() {
   }
 
   const API_BASE = await getApiBase();
+  const auth = await getAuthHeader(); // ✅ get Bearer token from JobPilot tab
 
   const r = await fetch(`${API_BASE}/jobs/match`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...auth, // ✅ adds Authorization: Bearer <token>
+    },
     body: JSON.stringify({ cv_id, job_title, company, job_description }),
   });
+
 
   if (!r.ok) {
     const text = await r.text();
@@ -143,10 +169,14 @@ async function generateCoverLetter() {
   }
 
   const API_BASE = await getApiBase();
+  const auth = await getAuthHeader(); // ✅
 
   const r = await fetch(`${API_BASE}/cover-letter/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...auth, // ✅
+    },
     body: JSON.stringify({ cv_id, job_id, job_title, company, job_description, tone }),
   });
 

@@ -1,14 +1,16 @@
 # app/api/cover_letter_routes.py
 import os
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.core.auth import get_current_user_id
 from app.schemas.cover_letter_schema import CoverLetterRequest
 from app.services.cover_letter_service import generate_cover_letter_text
 from app.services.openai_cover_letter import generate_cover_letter_llm
 from app.services.cover_letter_repository import (
     save_cover_letter,
     get_latest_cover_letter_by_job_id,
+    get_cover_letter_history_by_job_id,
 )
 from app.core.database import cvs_collection
 
@@ -22,8 +24,11 @@ def _to_object_id(value: str):
 
 
 @router.get("/cover-letter/latest/{job_id}")
-async def get_latest_cover_letter(job_id: str):
-    doc = await get_latest_cover_letter_by_job_id(job_id)
+async def get_latest_cover_letter(
+    job_id: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    doc = await get_latest_cover_letter_by_job_id(user_id=user_id, job_id=job_id)
     if not doc:
         return {"cover_letter": "", "mode": "none", "note": "No cover letter saved for this job yet."}
 
@@ -31,11 +36,34 @@ async def get_latest_cover_letter(job_id: str):
         "cover_letter": doc.get("text", ""),
         "mode": doc.get("mode", "template"),
         "note": doc.get("note"),
+        "id": doc.get("id"),
+        "tone": doc.get("tone"),
+        "created_at": doc.get("created_at"),
     }
 
 
+@router.get("/cover-letter/history/{job_id}")
+async def get_cover_letter_history(job_id: str):
+    docs = await get_cover_letter_history_by_job_id(job_id)
+    return [
+        {
+            "id": str(d.get("_id")),
+            "job_id": d.get("job_id"),
+            "tone": d.get("tone"),
+            "mode": d.get("mode"),
+            "note": d.get("note"),
+            "cover_letter": d.get("text", ""),
+            "created_at": d.get("created_at"),
+        }
+        for d in (docs or [])
+    ]
+
+
 @router.post("/cover-letter/generate")
-async def generate_cover_letter(req: CoverLetterRequest):
+async def generate_cover_letter(
+    req: CoverLetterRequest,
+    user_id: str = Depends(get_current_user_id),
+):
     # 1) CV lookup
     cv_doc = await cvs_collection.find_one({"cv_id": req.cv_id})
     if not cv_doc:
@@ -66,9 +94,10 @@ async def generate_cover_letter(req: CoverLetterRequest):
     else:
         letter = generate_cover_letter_text(cv_doc, req)
 
-    # ✅ 3) Persist per job_id
+    # ✅ 3) Persist as history (forever) scoped to this user + job
     await save_cover_letter(
         {
+            "user_id": user_id,  # ✅ critical
             "cv_id": req.cv_id,
             "job_id": req.job_id,
             "job_title": req.job_title,

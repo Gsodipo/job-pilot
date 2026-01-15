@@ -11,14 +11,18 @@ from app.services.cv_repository import get_cv_by_id_for_user
 from app.services.job_matcher import JobMatcherService
 from app.services.cv_parser import extract_skills_from_text
 from app.services.job_repository import (
-    save_job_match,
-    get_matches_by_cv_id,
-    get_tracked_jobs,
-    create_tracked_job,
-    delete_tracked_job,
-    update_tracked_job,
-    upsert_tracked_job_from_match,
+    save_job_match_for_user,
+    get_matches_by_cv_id_for_user,
+    get_tracked_jobs_for_user,
+    create_tracked_job_for_user,
+    delete_tracked_job_for_user,
+    update_tracked_job_for_user,
+    upsert_tracked_job_from_match_for_user,
 )
+
+import app.services.job_repository as jr
+print("JOB_REPO_LOADED_FROM:", jr.__file__)
+
 
 
 router = APIRouter(prefix="/jobs", tags=["Job Matching"])
